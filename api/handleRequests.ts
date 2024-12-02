@@ -1,4 +1,4 @@
-import { User, Room, Category } from "../protocols.ts";
+import { User, Room, Category } from "../protocols/protocols.ts";
 import { encodeHex } from "@std/encoding/hex";
 
 let users: User[] = [];
@@ -7,7 +7,7 @@ const categories: Category[] = [];
 
 
 try{
-    const userDbString = await Deno.readTextFile("./api/db/users.json");
+    const userDbString = await Deno.readTextFile("./db/users.json");
 
     if(userDbString.length > 0){
         users = JSON.parse(userDbString);
@@ -24,8 +24,6 @@ catch(error){
 
 export async function handleRequests(request: Request): Promise<Response>{
     const url = new URL(request.url);
-
-    console.log(url.pathname)
 
     if(url.pathname === "/api/register" && request.method === "POST"){
         const {name, password} = await request.json();
@@ -49,12 +47,12 @@ export async function handleRequests(request: Request): Promise<Response>{
         }
 
         users.push(user);
-        await Deno.writeTextFile("api/db/users.json", JSON.stringify(users, null, 4));
+        await Deno.writeTextFile("./db/users.json", JSON.stringify(users, null, 4));
 
         return new Response(JSON.stringify({message: name + "was added"}), {status: 201});
     }
 
-    if(url.pathname === "api/login" && request.method === "POST"){
+    if(url.pathname === "/api/login" && request.method === "POST"){
         const {name, password} = await request.json();
 
         const passwordBuffer = new TextEncoder().encode(password);
@@ -69,7 +67,7 @@ export async function handleRequests(request: Request): Promise<Response>{
         return new Response(JSON.stringify({error: "User Not Found"}), {status: 404});
     }
 
-    if(url.pathname === "api/categories" && request.method === "GET"){
+    if(url.pathname === "/api/categories" && request.method === "GET"){
         const categoryName = await request.json();
 
         for(const category of categories){
@@ -80,6 +78,5 @@ export async function handleRequests(request: Request): Promise<Response>{
 
         return new Response(JSON.stringify({error: "Category Not Found"}), {status: 404});
     }
-
     return new Response("Path Not Found",{status: 404});
 }

@@ -2,8 +2,8 @@ const socket = new WebSocket("ws://localhost:8000/");
 
 socket.addEventListener("open", (event) => {
     document.body.style.backgroundColor = "red";
-/* 
-    const request = new Request("./api/login", {
+
+    const request = new Request("./api/register", {
         method: "POST",
         headers: {"content-type": "application/json"},
         body: JSON.stringify({
@@ -12,7 +12,7 @@ socket.addEventListener("open", (event) => {
         })
     })
 
-    fetch(request) */
+    fetch(request)
 
 });
 

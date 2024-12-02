@@ -1,5 +1,5 @@
 import { serveFile, serveDir } from "jsr:@std/http/file-server";
-import { handleRequests } from "./api/handleRequests.ts";
+import { handleRequests } from "../api/handleRequests.ts";
 
 
 export function serveFileOrDir(request: Request){
@@ -10,12 +10,11 @@ export function serveFileOrDir(request: Request){
     }
 
     if(pathname === "/") {
-        return serveFile(request, "./index.html");
+        return serveFile(request, "./public/index.html");
     }
 
     if(pathname === "/index.js"){
-        console.log("cum")
-        return serveFile(request, "./index.js");
+        return serveFile(request, "./public/index.js");
     }
 
     return serveDir(request, {

@@ -1,5 +1,5 @@
 import { serveFileOrDir } from "./serveFileOrDir.ts";
-import { ServerToClientMessage, ClientToServerMessage } from "./protocols.ts";
+import { ServerToClientMessage, ClientToServerMessage } from "../protocols/protocols.ts";
 
 function handleWsRequests(request: Request) {
     if (request.headers.get("upgrade") === "websocket") {
@@ -35,22 +35,3 @@ function handleWsRequests(request: Request) {
 }
 
 Deno.serve(handleWsRequests);
-
-
-
-/* 
-//server => client
-    "event": "startGame"
-    "data": {
-        "roomId" 
-    }
-
-
-//client => server
-    "action": "submitVote",
-    "data": {
-        "playerId"
-    }
-
-
-*/
