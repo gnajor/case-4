@@ -1,4 +1,4 @@
-import { serveFile, serveDir } from "jsr:@std/http/file-server";
+import { serveFile, serveDir } from "@std/http/file-server";
 import { handleRequests } from "../api/handleRequests.ts";
 
 
