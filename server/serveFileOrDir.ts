@@ -1,7 +1,6 @@
 import { serveFile, serveDir } from "@std/http/file-server";
 import { handleRequests } from "../api/handleRequests.ts";
 
-
 export function serveFileOrDir(request: Request){
     const pathname = new URL(request.url).pathname;
 
@@ -9,7 +8,7 @@ export function serveFileOrDir(request: Request){
         return handleRequests(request);
     }
 
-    if(pathname === "/") {
+    if(pathname === "/"){
         return serveFile(request, "./public/index.html");
     }
 

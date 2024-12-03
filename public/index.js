@@ -10,10 +10,9 @@ socket.addEventListener("open", (event) => {
             name: "Leo",
             password: "admin"
         })
-    })
+    });
 
-    fetch(request)
-
+    fetch(request);
 });
 
 socket.addEventListener("messages", (event) => {

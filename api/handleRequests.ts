@@ -1,10 +1,8 @@
-import { User, Room, Category } from "../protocols/protocols.ts";
+import { UserDb, Category } from "../protocols/protocols.ts";
 import { encodeHex } from "@std/encoding/hex";
 
-let users: User[] = [];
-const rooms: Room[] = [];
+let users: UserDb[] = [];
 const categories: Category[] = [];
-
 
 try{
     const userDbString = await Deno.readTextFile("./db/users.json");
@@ -72,11 +70,22 @@ export async function handleRequests(request: Request): Promise<Response>{
 
         for(const category of categories){
             if(categoryName === category.name){
-                return new Response(JSON.stringify({quesstions: category.questions}), {status: 200});
+                return new Response(JSON.stringify({questions: category.questions}), {status: 200});
             }
         }
 
         return new Response(JSON.stringify({error: "Category Not Found"}), {status: 404});
     }
+
+    if(url.pathname === "/api/user" && request.method === "PATCH"){
+        const updatedUser = await request.json();
+
+        for(let i = 0; i < users.length; i++){
+            if(users[i].id === updatedUser.id){
+                users[i].profilePic = updatedUser.profilePic;
+            }
+        }
+    }
+
     return new Response("Path Not Found",{status: 404});
 }

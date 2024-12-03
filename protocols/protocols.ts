@@ -4,22 +4,17 @@ export interface ServerToClientMessage{
 }
 
 export interface ClientToServerMessage{
-    event: string,
+    action: string,
     data: Record<string, unknown>
 }
 
-export interface User{
+//db protocols
+
+export interface UserDb{
     id: string,
     name: string,
     password: string,
     profilePic?: string, //should be optional for now
-    roomId?: number,
-}
-
-export interface Room{
-    id: string,
-    password: number,
-    members: User[]
 }
 
 export interface Category{
@@ -27,9 +22,18 @@ export interface Category{
     questions: string[] 
 }
 
+export interface Room{
+    id: string,
+    password: number,
+    category: Category,
+}
 
-//id
-//name
-//password
-//roomId
-//
+export interface OnlineUser{
+    roomId: number,
+    socket: unknown
+}
+
+export interface state{
+    users: User[],
+    rooms: Room[]
+}
