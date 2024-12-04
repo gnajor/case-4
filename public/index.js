@@ -1,24 +1,28 @@
+import { renderStartPage } from "./ui/startPage/startPage.js";
+import * as apiCom from "./apiCom/apiCom.js";
+
 const socket = new WebSocket("ws://localhost:8000/");
 
-socket.addEventListener("open", (event) => {
-    document.body.style.backgroundColor = "red";
+socket.addEventListener("open", () => {
+    const loginState = localStorage.getItem("token");
 
-    const request = new Request("./api/register", {
-        method: "POST",
-        headers: {"content-type": "application/json"},
-        body: JSON.stringify({
-            name: "Leo",
-            password: "admin"
-        })
-    });
+    if(!loginState){
+        renderStartPage("wrapper")
+    }
 
-    fetch(request);
+    /* socket.send(JSON.stringify({
+        action: "user:current",
+        data: {
+            id: "dasfdasdf",
+            name: "leo",
+        }
+    })) */
 });
 
-socket.addEventListener("messages", (event) => {
-    console.log(event);
+socket.addEventListener("message", (event) => {
+
 });
 
-socket.addEventListener("closed", (event) => {
+socket.addEventListener("close", () => {
     console.log("connection closed");
 });

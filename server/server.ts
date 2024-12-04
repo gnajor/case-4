@@ -1,21 +1,28 @@
 import { serveFileOrDir } from "./serveFileOrDir.ts";
 import { ServerToClientMessage, ClientToServerMessage } from "../protocols/protocols.ts";
+import { handleUser } from "./wsHandlers.ts";
+import { send } from "./wsHandlers.ts";
 
 function handleWsRequests(request: Request) {
     const { socket, response } = Deno.upgradeWebSocket(request);
 
-    socket.addEventListener("open", (event) => {
-        console.log("Someone connected to our server!");
-    });
+    socket.onopen = () => {
+        
+    };
 
-    socket.addEventListener("message", (event) => {
-        /* const clientMessage: ClientToServerMessage = JSON.parse(event.data);
-        socket.send(event.data); */
-    });
+    socket.onmessage = (event) => {
+        const clientMessage: ClientToServerMessage = JSON.parse(event.data);
 
-    socket.addEventListener("close", (event) => {
+        switch(clientMessage.action){
+            case "user:current":
+                handleUser(socket, event.data);
+                break;
+        }
+    };
+
+    socket.onclose = () => {
         console.log("Goodbye...");
-    });
+    };
 
     return response;
 }

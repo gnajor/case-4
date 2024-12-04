@@ -1,26 +1,29 @@
 export interface ServerToClientMessage{
     event: string,
-    data: Record<string, unknown>
+    data: Record<string, string | number>
 }
 
 export interface ClientToServerMessage{
     action: string,
-    data: Record<string, unknown>
+    data: Record<string, string | number>
 }
 
 //db protocols
 
 export interface UserDb{
+    token: string,
     id: string,
     name: string,
     password: string,
-    profilePic?: string, //should be optional for now
+    profilePic?: string, 
 }
 
 export interface Category{
     name: string,
     questions: string[] 
 }
+
+//ws protocols
 
 export interface Room{
     id: string,
@@ -29,11 +32,12 @@ export interface Room{
 }
 
 export interface OnlineUser{
-    roomId: number,
-    socket: unknown
+    name: string,
+    roomId?: number,
+    socket: WebSocket
 }
 
-export interface state{
-    users: User[],
+export interface State{
+    users: OnlineUser[],
     rooms: Room[]
 }

@@ -12,13 +12,10 @@ export function serveFileOrDir(request: Request){
         return serveFile(request, "./public/index.html");
     }
 
-    if(pathname === "/index.js"){
-        return serveFile(request, "./public/index.js");
-    }
-
     return serveDir(request, {
-        fsRoot: "assets",
-        urlRoot: "static"
+        fsRoot: "public",
+        urlRoot: ""
     });
+    
 
 }

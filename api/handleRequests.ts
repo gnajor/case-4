@@ -1,5 +1,5 @@
 import { UserDb, Category } from "../protocols/protocols.ts";
-import { encodeHex } from "@std/encoding/hex";
+import { encrypt, generateToken } from "./utils.ts";
 
 let users: UserDb[] = [];
 const categories: Category[] = [];
@@ -32,13 +32,12 @@ export async function handleRequests(request: Request): Promise<Response>{
             }
         }
 
-        const passwordBuffer = new TextEncoder().encode(password) //turns password into a Uint8array AKA an array of bytes AKA ArrayBuffer
-        const hashedBuffer = await crypto.subtle.digest("SHA-256", passwordBuffer); //hashed ArrayBuffer
-        const encryptedPassword = encodeHex(hashedBuffer); // converts the arrayBuffer to hexadecimal string
-        
+        const encryptedPassword = await encrypt(password);
+        const encryptedToken = await encrypt(generateToken());
         const id = crypto.randomUUID();
 
-        const user: User = {
+        const user: UserDb = {
+            token: encryptedToken,
             id: id,
             name: name,
             password: encryptedPassword,
@@ -47,19 +46,16 @@ export async function handleRequests(request: Request): Promise<Response>{
         users.push(user);
         await Deno.writeTextFile("./db/users.json", JSON.stringify(users, null, 4));
 
-        return new Response(JSON.stringify({message: name + "was added"}), {status: 201});
+        return new Response(JSON.stringify({message: name + " was added"}), {status: 201});
     }
 
     if(url.pathname === "/api/login" && request.method === "POST"){
         const {name, password} = await request.json();
-
-        const passwordBuffer = new TextEncoder().encode(password);
-        const hashedBuffer = await crypto.subtle.digest("SHA-256", passwordBuffer);
-        const encryptedPassword = encodeHex(hashedBuffer);
+        const encryptedPassword = await encrypt(password);
 
         for(const user of users){
             if(user.name === name && user.password === encryptedPassword){
-                return new Response(JSON.stringify({user: name, id: user.id}), {status: 200});
+                return new Response(JSON.stringify({user: name, token: user.token}), {status: 200});
             }
         }
         return new Response(JSON.stringify({error: "User Not Found"}), {status: 404});
