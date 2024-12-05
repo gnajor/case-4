@@ -1,7 +1,8 @@
 import { PubSub } from "../utils/pubsub.js";
 
 async function apiCom(data, action){
-    const options = {}
+    const options = {};
+    const response = undefined;
 
     switch(action){
         case "user:login": {
@@ -12,6 +13,12 @@ async function apiCom(data, action){
             }
             
             const resource = await fetcher("../../api/login", options);
+
+            PubSub.publish({
+                event: "",
+                
+            })
+
             localStorage.setItem("token", resource.token);
             break;
         }
@@ -27,6 +34,13 @@ async function apiCom(data, action){
             break;
         }
 
+        case "token:authorization": {
+            options.method = "GET";
+
+            const resource = await fetcher(`../../api/user/token=${data}`);
+            break;
+        }
+
         default: {
             console.warn("Unknown action: " + action)
         }
@@ -35,11 +49,16 @@ async function apiCom(data, action){
 
 async function fetcher(url, options){
     try{
-        const response = await fetch(url, {
+        const fetchOptions = (url, {
             method: options.method,
             headers: {"content-type": "applicationjson"},
-            body: JSON.stringify(options.body)
         });
+
+        if(fetchOptions.method !== "GET" && options.body){
+            fetchOptions.body = JSON.stringify(options.body);
+        }
+
+        const response = await fetch(url, fetchOptions);
 
         if(!response.ok){
             const message = await response.json();
@@ -67,5 +86,12 @@ PubSub.subscribe({
     event: "sendUserRegData",
     listener: (user) => {
         apiCom(user, "user:register")
+    }
+})
+
+PubSub.subscribe({
+    event: "authorizeToken",
+    listener: (details) => {
+        apiCom(details.token, details.action)
     }
 })

@@ -83,5 +83,20 @@ export async function handleRequests(request: Request): Promise<Response>{
         }
     }
 
+    if(url.pathname === "/api/user?token" && request.method === "GET"){
+        const urlToken = url.searchParams.get("token");
+        if(urlToken?.length !== 64){
+            return new Response(JSON.stringify({error: "Token not approved"}), {status: 400});
+        }
+
+        const user = users.find((user) => user.token === urlToken);
+
+        if(!user){
+            return new Response(JSON.stringify({error: "Token does not exist"}), {status: 401});
+        }
+
+        return new Response(JSON.stringify(user.name), {status: 202});
+    }
+
     return new Response("Path Not Found",{status: 404});
 }

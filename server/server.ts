@@ -1,13 +1,12 @@
 import { serveFileOrDir } from "./serveFileOrDir.ts";
 import { ServerToClientMessage, ClientToServerMessage } from "../protocols/protocols.ts";
-import { handleUser } from "./wsHandlers.ts";
-import { send } from "./wsHandlers.ts";
+import { handleUser, send } from "./wsHandlers.ts";
 
 function handleWsRequests(request: Request) {
     const { socket, response } = Deno.upgradeWebSocket(request);
 
     socket.onopen = () => {
-        
+        console.log("hello")
     };
 
     socket.onmessage = (event) => {
