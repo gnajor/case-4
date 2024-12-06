@@ -18,6 +18,7 @@ export function renderStartPage(parentId){
                             <input id="pwd-input" type="password">
                         </div>
                         <button id="register-button">Register</button>`;
+                        
 
     const registerButton = parent.querySelector("#register-button");
     const loginButton = parent.querySelector("#login-button");
@@ -26,6 +27,10 @@ export function renderStartPage(parentId){
     loginButton.addEventListener("click", () => {
         const inputName = parent.querySelector("#login > #name-input").value;
         const inputPwd = parent.querySelector("#login > #pwd-input").value;
+
+        if(!inputName || !inputPwd){
+            return console.error("error: name or password cannnot be empty")
+        }
 
         PubSub.publish({
             event: "sendUserLoginData",
@@ -41,12 +46,18 @@ export function renderStartPage(parentId){
         const inputName = parent.querySelector("#register > #name-input").value;
         const inputPwd = parent.querySelector("#register > #pwd-input").value;
 
+        if(!inputName || !inputPwd){
+            return console.error("error: name or password cannnot be empty")
+        }
+
         PubSub.publish({
             event: "sendUserRegData",
             details: {
                 name: inputName,
                 password: inputPwd
             }
-        })
+        });
     });
 }
+
+//pubsub to here

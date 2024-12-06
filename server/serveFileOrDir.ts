@@ -16,6 +16,4 @@ export function serveFileOrDir(request: Request){
         fsRoot: "public",
         urlRoot: ""
     });
-    
-
 }

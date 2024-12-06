@@ -6,14 +6,6 @@ const socket = new WebSocket("ws://localhost:8000/");
 
 socket.addEventListener("open", () => {
     handleStart();
-
-    /* socket.send(JSON.stringify({
-        action: "user:current",
-        data: {
-            id: "dasfdasdf",
-            name: "leo",
-        }
-    })) */
 });
 
 socket.addEventListener("message", (event) => {
@@ -27,19 +19,36 @@ socket.addEventListener("close", () => {
 
 function handleStart(){
     const token = localStorage.getItem("token");
+    const name = localStorage.getItem("name");
 
-    if(!token){
+    if(!token && !name){
         renderStartPage("wrapper");
     }
     else{
-        PubSub.subscribe({
-            event: "authorizeToken",
+        PubSub.publish({
+            event: "authorizeTokenName",
             details: {
                 token: token,
-                action: "token:authorization"
+                name: name,
+                action: "token-name:authorization"
             }
         });
 
-        
+        PubSub.subscribe({
+            event: "unauthorizedTokenName",
+            listener: (message) => {
+                localStorage.clear();
+                renderStartPage("wrapper");
+            }
+        })
     }
 }
+
+function redirectToLogin(parentId = "wrapper"){
+
+}
+
+
+//from component PubSub to apiCom, check if login is correct and pubsub to a redirectFile. This file redirects the path that is needed
+
+//For example Login Pubsub to apicom and from apicom Pubsub to 

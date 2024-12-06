@@ -13,14 +13,7 @@ async function apiCom(data, action){
             }
             
             const resource = await fetcher("../../api/login", options);
-
-            PubSub.publish({
-                event: "",
-                
-            })
-
-            localStorage.setItem("token", resource.token);
-            break;
+            return resource;
         }
 
         case "user:register": {
@@ -31,28 +24,28 @@ async function apiCom(data, action){
             }
             
             const resource = await fetcher("../../api/register", options);
-            break;
+            return resource;
         }
 
-        case "token:authorization": {
+        case "token-name:authorization": {
             options.method = "GET";
-
-            const resource = await fetcher(`../../api/user/token=${data}`);
-            break;
+            const resource = await fetcher(`../../api/user/?token=${data.token}&name=${data.name}`, options);
+            return resource;
         }
 
         default: {
-            console.warn("Unknown action: " + action)
+            console.warn("Unknown action: " + action);
+            return null;
         }
     }
 }
 
 async function fetcher(url, options){
     try{
-        const fetchOptions = (url, {
+        const fetchOptions = {
             method: options.method,
             headers: {"content-type": "applicationjson"},
-        });
+        };
 
         if(fetchOptions.method !== "GET" && options.body){
             fetchOptions.body = JSON.stringify(options.body);
@@ -63,35 +56,52 @@ async function fetcher(url, options){
         if(!response.ok){
             const message = await response.json();
 
+            if(response.status === 401 || response.status === 403){
+                PubSub.publish({
+                    event: "unauthorizedTokenName",
+                    details: message
+                });
+            }
+
             throw new Error(
                 message.error
-            )
+            );
         };
 
         return await response.json();
     }
     catch(error){
+
         console.error(error);
     }
 }
 
 PubSub.subscribe({
     event: "sendUserLoginData",
-    listener: (user) => {
-        apiCom(user, "user:login")
+    listener: async (user) => {
+        const resource = await apiCom(user, "user:login");
+
+        if(resource){
+            localStorage.setItem("token", resource.token);
+            localStorage.setItem("name", resource.name);
+        }
     }
 });
 
 PubSub.subscribe({
     event: "sendUserRegData",
-    listener: (user) => {
-        apiCom(user, "user:register")
+    listener: async (user) => {
+        const resource = await apiCom(user, "user:register");
+        console.log(resource);
     }
-})
+});
 
 PubSub.subscribe({
-    event: "authorizeToken",
-    listener: (details) => {
-        apiCom(details.token, details.action)
+    event: "authorizeTokenName",
+    listener: async (details) => {
+        const resource = await apiCom(
+            {name: details.name, token: details.token, }, 
+            details.action
+        );
     }
-})
+});

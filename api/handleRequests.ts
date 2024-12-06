@@ -55,7 +55,7 @@ export async function handleRequests(request: Request): Promise<Response>{
 
         for(const user of users){
             if(user.name === name && user.password === encryptedPassword){
-                return new Response(JSON.stringify({user: name, token: user.token}), {status: 200});
+                return new Response(JSON.stringify({name: name, token: user.token}), {status: 200});
             }
         }
         return new Response(JSON.stringify({error: "User Not Found"}), {status: 404});
@@ -69,7 +69,7 @@ export async function handleRequests(request: Request): Promise<Response>{
                 return new Response(JSON.stringify({questions: category.questions}), {status: 200});
             }
         }
-
+  
         return new Response(JSON.stringify({error: "Category Not Found"}), {status: 404});
     }
 
@@ -83,16 +83,26 @@ export async function handleRequests(request: Request): Promise<Response>{
         }
     }
 
-    if(url.pathname === "/api/user?token" && request.method === "GET"){
+    if(url.pathname.startsWith("/api/user") && request.method === "GET"){
         const urlToken = url.searchParams.get("token");
+        const urlName = url.searchParams.get("name");
+
         if(urlToken?.length !== 64){
-            return new Response(JSON.stringify({error: "Token not approved"}), {status: 400});
+            return new Response(JSON.stringify({error: "Token not approved", clearStorage: true}), {status: 401});
         }
 
         const user = users.find((user) => user.token === urlToken);
 
         if(!user){
-            return new Response(JSON.stringify({error: "Token does not exist"}), {status: 401});
+            return new Response(JSON.stringify({error: "No user with that token exists", clearStorage: true}), {status: 401});
+        }
+
+        if(!urlName || urlName === ""){
+            return new Response(JSON.stringify({error: "Username not approved", clearStorage: true}), {status: 401});
+        }
+
+        if(urlName !== user.name){
+            return new Response(JSON.stringify({error: "username does not exist", clearStorage: true}), {status: 401});
         }
 
         return new Response(JSON.stringify(user.name), {status: 202});
