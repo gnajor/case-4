@@ -1,3 +1,15 @@
+:root{
+    --accent-color-1: #B7BF9B;
+    --accent-color-2: #2B448C;
+    --white-color: #FFF;
+    --box-shadow-color: #000;
+    --black-color: #000;
+}
+
+html{
+    font-size: 16px;
+}
+
 *{
     box-sizing: border-box;
 }
@@ -6,6 +18,71 @@ body{
     margin:0;
 }
 
-#register{
-    display: none;
+h1{
+    font-size: 2.5rem;
+    text-align: center;
+    margin:0;
+    color: var(--white-color);
+}
+
+button{
+    border: none;
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    line-height: normal;
+    font-weight: bold;
+}
+
+.button-container{
+    display: flex;
+    flex-direction: column;
+    font-size: 1.5rem;
+    gap:0.4rem;
+    padding: 0 10%;
+}
+
+.login-button{
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 0% 100%);
+    background-color: var(--accent-color-1);
+    padding:1.75rem 0;
+}
+
+.register-button{
+    clip-path: polygon(0 30%, 100% 0, 100% 100%, 0% 100%);
+    background-color: var(--accent-color-2);
+    color:var(--white-color);
+    padding:1.75rem 0;
+}
+
+
+/* entry-page css */
+
+body:has(#entry-page){
+    --h1-margin-top: 3rem;
+
+    margin-top:var(--h1-margin-top); /* h1 margin-top */
+}
+
+#entry-page{
+    background-image: url("./media/backgrounds/entry-page-background.jpg");
+    background-size: cover;
+    background-position: 50% 10%;
+    min-height: calc(100vh - var(--h1-margin-top));
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+}
+
+#entry-page #game-title{
+    background: linear-gradient(180deg, #000 30%, rgba(0, 0, 0, 0.00) 100%);
+    box-shadow: 0px calc(0rem - var(--h1-margin-top)) 0px 0px var(--box-shadow-color);
+    position: relative;
+    padding:0 10% 80% 10%;
+}
+
+#entry-page .button-container{
+    margin-bottom: 3rem;
 }

@@ -1,14 +1,35 @@
-import {PubSub} from "../../utils/pubsub.js";
+import { navigateTo } from "../../pageHandler/pageHandler.js";
 
-export function renderStartPage(parentId){
-    let login = true;
+export function renderEntryPage(parentId){
     const parent = document.querySelector("#" + parentId);
 
     if(!parent){
         return console.error("Parent Not Found");
     }
 
-    parent.innerHTML = `<div id="login">
+    parent.innerHTML = `<div id="entry-page" class="page">
+                            <div id="game-title">
+                                <h1>WELCOME TO LYIN'N SPY'N</h1>
+                            </div>
+                            <div class="button-container">
+                                <button class="login-button">LOGIN</button>
+                                <button class="register-button">REGISTER</button>
+                            </div>
+                        </div>`
+
+    const loginButton = parent.querySelector(".login-button");
+    const registerButton = parent.querySelector(".register-button");
+
+    loginButton.addEventListener("click", () => {
+        navigateTo("login");
+    });
+    
+    registerButton.addEventListener("click", () => {
+        navigateTo("register");
+    });
+}
+
+/*                         <div id="login">
                             <input id="name-input" type="text">
                             <input id="pwd-input" type="password">
                         </div>
@@ -32,14 +53,10 @@ export function renderStartPage(parentId){
             return console.error("error: name or password cannnot be empty")
         }
 
-        PubSub.publish({
-            event: "sendUserLoginData",
-            details: {
-                name: inputName,
-                password: inputPwd
-            }
-        })
-
+        pageHandler.handleLogin({
+            name: inputName,
+            password: inputPwd
+        });
     });
 
     registerButton.addEventListener("click", () => {
@@ -50,14 +67,8 @@ export function renderStartPage(parentId){
             return console.error("error: name or password cannnot be empty")
         }
 
-        PubSub.publish({
-            event: "sendUserRegData",
-            details: {
-                name: inputName,
-                password: inputPwd
-            }
+        pageHandler.handleRegister({
+            name: inputName,
+            password: inputPwd
         });
-    });
-}
-
-//pubsub to here
+    }); */

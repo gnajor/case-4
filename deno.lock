@@ -66,7 +66,8 @@
     "dependencies": [
       "jsr:@std/assert@1",
       "jsr:@std/encoding@^1.0.5",
-      "jsr:@std/http@^1.0.11"
+      "jsr:@std/http@^1.0.11",
+      "jsr:@std/path@^1.0.8"
     ]
   }
 }

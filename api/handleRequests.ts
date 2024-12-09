@@ -1,5 +1,5 @@
 import { UserDb, Category } from "../protocols/protocols.ts";
-import { encrypt, generateToken } from "./utils.ts";
+import { encrypt, generateRandString } from "../utils/utils.ts";
 
 let users: UserDb[] = [];
 const categories: Category[] = [];
@@ -33,7 +33,7 @@ export async function handleRequests(request: Request): Promise<Response>{
         }
 
         const encryptedPassword = await encrypt(password);
-        const encryptedToken = await encrypt(generateToken());
+        const encryptedToken = await encrypt(generateRandString());
         const id = crypto.randomUUID();
 
         const user: UserDb = {
@@ -55,7 +55,7 @@ export async function handleRequests(request: Request): Promise<Response>{
 
         for(const user of users){
             if(user.name === name && user.password === encryptedPassword){
-                return new Response(JSON.stringify({name: name, token: user.token}), {status: 200});
+                return new Response(JSON.stringify({id: user.id, name: name, token: user.token}), {status: 200});
             }
         }
         return new Response(JSON.stringify({error: "User Not Found"}), {status: 404});
@@ -88,24 +88,28 @@ export async function handleRequests(request: Request): Promise<Response>{
         const urlName = url.searchParams.get("name");
 
         if(urlToken?.length !== 64){
-            return new Response(JSON.stringify({error: "Token not approved", clearStorage: true}), {status: 401});
+            return new Response(JSON.stringify({error: "Token not approved"}), {status: 401});
         }
 
         const user = users.find((user) => user.token === urlToken);
 
         if(!user){
-            return new Response(JSON.stringify({error: "No user with that token exists", clearStorage: true}), {status: 401});
+            return new Response(JSON.stringify({error: "No user with that token exists"}), {status: 401});
         }
 
         if(!urlName || urlName === ""){
-            return new Response(JSON.stringify({error: "Username not approved", clearStorage: true}), {status: 401});
+            return new Response(JSON.stringify({error: "Username not approved"}), {status: 401});
         }
 
         if(urlName !== user.name){
-            return new Response(JSON.stringify({error: "username does not exist", clearStorage: true}), {status: 401});
+            return new Response(JSON.stringify({error: "username does not exist"}), {status: 401});
         }
 
-        return new Response(JSON.stringify(user.name), {status: 202});
+        return new Response(JSON.stringify({
+            id: user.id, 
+            name: user.name, 
+            token: user.token
+        }), {status: 202});
     }
 
     return new Response("Path Not Found",{status: 404});

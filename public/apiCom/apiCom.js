@@ -1,6 +1,6 @@
 import { PubSub } from "../utils/pubsub.js";
 
-async function apiCom(data, action){
+export async function apiCom(data, action){
     const options = {};
     const response = undefined;
 
@@ -56,13 +56,6 @@ async function fetcher(url, options){
         if(!response.ok){
             const message = await response.json();
 
-            if(response.status === 401 || response.status === 403){
-                PubSub.publish({
-                    event: "unauthorizedTokenName",
-                    details: message
-                });
-            }
-
             throw new Error(
                 message.error
             );
@@ -75,33 +68,3 @@ async function fetcher(url, options){
         console.error(error);
     }
 }
-
-PubSub.subscribe({
-    event: "sendUserLoginData",
-    listener: async (user) => {
-        const resource = await apiCom(user, "user:login");
-
-        if(resource){
-            localStorage.setItem("token", resource.token);
-            localStorage.setItem("name", resource.name);
-        }
-    }
-});
-
-PubSub.subscribe({
-    event: "sendUserRegData",
-    listener: async (user) => {
-        const resource = await apiCom(user, "user:register");
-        console.log(resource);
-    }
-});
-
-PubSub.subscribe({
-    event: "authorizeTokenName",
-    listener: async (details) => {
-        const resource = await apiCom(
-            {name: details.name, token: details.token, }, 
-            details.action
-        );
-    }
-});

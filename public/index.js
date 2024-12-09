@@ -1,51 +1,73 @@
-import { renderStartPage } from "./ui/startPage/startPage.js";
-import * as apiCom from "./apiCom/apiCom.js";
+import { handleRoute, pageHandler } from "./pageHandler/pageHandler.js";
 import { PubSub } from "./utils/pubsub.js";
 
 const socket = new WebSocket("ws://localhost:8000/");
 
+//to be able to use reload and the arrows you need to store the page history in either localStorage or sessionStorage
+
+document.addEventListener("DOMContentLoaded", () => {
+    handleRoute();
+});
+
+window.addEventListener("popstate", () => { //popstate AKA using the website arrows 
+    handleRoute(); 
+});
+
 socket.addEventListener("open", () => {
-    handleStart();
+    pageHandler.handleEntry();
 });
 
 socket.addEventListener("message", (event) => {
+    const serverToClientMessage = JSON.parse(event.data);
+    
+    switch(serverToClientMessage.event){
+        case "user:list": {
+            const users = serverToClientMessage.data.users;
+        
+            for(const user of users){
+                document.querySelector("#wrapper").innerHTML += user.name;
+            }
+            break;
+        }
 
+        case "room:joined": {
+            document.querySelector("#wrapper").innerHTML += serverToClientMessage.data.name
+        }
+    }
 });
 
 socket.addEventListener("close", () => {
     console.log("connection closed");
 });
 
+export function addUserToWs(user){
+    //might check later if user is already in the array
 
-function handleStart(){
-    const token = localStorage.getItem("token");
-    const name = localStorage.getItem("name");
-
-    if(!token && !name){
-        renderStartPage("wrapper");
+    const message = {
+        action: "user:join",
+        data: {
+            id: user.id,
+            name: user.name,
+        }
     }
-    else{
-        PubSub.publish({
-            event: "authorizeTokenName",
-            details: {
-                token: token,
-                name: name,
-                action: "token-name:authorization"
-            }
-        });
-
-        PubSub.subscribe({
-            event: "unauthorizedTokenName",
-            listener: (message) => {
-                localStorage.clear();
-                renderStartPage("wrapper");
-            }
-        })
-    }
+    socket.send(JSON.stringify(message));
 }
 
-function redirectToLogin(parentId = "wrapper"){
+export function joinRoom(data){
+    const message = {
+        action: "room:join",
+        data: data
+    }
+    socket.send(JSON.stringify(message));
+}
 
+export function createRoom(user){
+    const message = {
+        action: "room:create",
+        data: user
+    }
+
+    socket.send(JSON.stringify(message));
 }
 
 
