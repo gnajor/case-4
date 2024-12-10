@@ -20,7 +20,7 @@ export function renderLoginPage(parentId){
                                         <input type="text">
                                     </div>
                                     <div class="input-pwd-container">
-                                        <div class="pwd-label"></div>
+                                        <div class="pwd-label">PASSWORD </div>
                                         <input type="password">
                                     </div>
                                 </div>

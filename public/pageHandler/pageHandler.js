@@ -2,6 +2,7 @@ import { apiCom } from "../apiCom/apiCom.js";
 import { addUserToWs, createRoom, joinRoom } from "../index.js";
 import { renderEntryPage } from "../pages/entryPage/entryPage.js";
 import { renderHomePage } from "../pages/homePage/homePage.js";
+import { renderLobbyPage } from "../pages/lobbyPage/lobbyPage.js";
 import { renderLoginPage } from "../pages/loginPage/loginPage.js";
 import { renderRegisterPage } from "../pages/registerPage/registerPage.js";
 
@@ -65,7 +66,7 @@ export const pageHandler = {
             "roomPwd": roomPwd
         };
 
-        joinRoom(data);
+        navigateTo("lobby");
     },
 
     handleCreateRoom(){
@@ -74,13 +75,13 @@ export const pageHandler = {
             "host": true,
         }
 
-        createRoom(user);        
+        navigateTo("lobby");     
     } 
 }
 
 
-export function navigateTo(page){
-    const parent = document.querySelector( pageParent);
+export function navigateTo(page, data){
+    const parent = document.querySelector(pageParent);
 
     if(parent){
         parent.innerHTML = "";
@@ -107,6 +108,12 @@ export function navigateTo(page){
         case "register": {
             renderRegisterPage(pageParent);
             window.history.pushState({}, "", "/register");
+            break;
+        }
+
+        case "lobby": {
+            renderLobbyPage(pageParent, data);
+            window.history.pushState({}, "", "/lobby");
             break;
         }
     }

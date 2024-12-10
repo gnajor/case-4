@@ -1,4 +1,4 @@
-import { handleRoute, pageHandler } from "./pageHandler/pageHandler.js";
+import { handleRoute, pageHandler, navigateTo} from "./pageHandler/pageHandler.js";
 import { PubSub } from "./utils/pubsub.js";
 
 const socket = new WebSocket("ws://localhost:8000/");
@@ -23,15 +23,13 @@ socket.addEventListener("message", (event) => {
     switch(serverToClientMessage.event){
         case "user:list": {
             const users = serverToClientMessage.data.users;
-        
-            for(const user of users){
-                document.querySelector("#wrapper").innerHTML += user.name;
-            }
+            navigateTo("lobby", users);
             break;
         }
 
         case "room:joined": {
-            document.querySelector("#wrapper").innerHTML += serverToClientMessage.data.name
+            navigateTo("lobby", serverToClientMessage.data);
+            break;
         }
     }
 });
@@ -69,6 +67,8 @@ export function createRoom(user){
 
     socket.send(JSON.stringify(message));
 }
+
+
 
 
 //from component PubSub to apiCom, check if login is correct and pubsub to a redirectFile. This file redirects the path that is needed

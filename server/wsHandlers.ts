@@ -83,8 +83,6 @@ export function handleCreateRoom(socket: WebSocket, user: Record<string, string 
     state.makeUserHost(foundUser, user.host as boolean);
     state.addUserToRoom(foundUser, id);
 
-    console.log(state.rooms)
-
     send(socket, {
         event: "room:created",
         data: {
@@ -95,7 +93,7 @@ export function handleCreateRoom(socket: WebSocket, user: Record<string, string 
 }
 
 export function handleJoinRoom(socket: WebSocket, data:Record<string, string>): void{
-    const specificUser = state.getUser(data.userId) ;
+    const specificUser = state.getUser(data.userId);
     const specificRoom = state.getRoom(data.roomPwd);
 
     if(!specificRoom){
@@ -140,8 +138,10 @@ function handleLeaveRoom(socket: WebSocket, user: OnlineUser): void{
 
 function handleProfileChange(socket: WebSocket, user: OnlineUser): void{
     
-}
+}   
 
 export function send(socket:WebSocket, payload:ServerToClientMessage): void{
     socket.send(JSON.stringify(payload));
 }
+
+
