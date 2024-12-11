@@ -5,6 +5,7 @@ import { renderHomePage } from "../pages/homePage/homePage.js";
 import { renderLobbyPage } from "../pages/lobbyPage/lobbyPage.js";
 import { renderLoginPage } from "../pages/loginPage/loginPage.js";
 import { renderRegisterPage } from "../pages/registerPage/registerPage.js";
+import { renderJoinPage } from "../pages/joinPage/joinPage.js";
 
 const pageParent = "wrapper";
 
@@ -29,8 +30,9 @@ export const pageHandler = {
                 token: resource.token
             }
 
-            navigateTo("home");
+            navigateTo("home", this.currentUser.name);
             addUserToWs(this.currentUser);
+
         }
         else{
             localStorage.clear();
@@ -50,7 +52,7 @@ export const pageHandler = {
 
             localStorage.setItem("token", this.currentUser.token);
             localStorage.setItem("name", this.currentUser.name);
-            navigateTo("home");
+            navigateTo("home", this.currentUser.name);
             addUserToWs(this.currentUser);
         }
     },
@@ -61,12 +63,17 @@ export const pageHandler = {
     },
 
     handleJoinRoom(roomPwd){
-        const data = {
-            "userId": this.currentUser.id,
-            "roomPwd": roomPwd
-        };
+        if(roomPwd){
+            const data = {
+                "userId": this.currentUser.id,
+                "roomPwd": roomPwd
+            };
 
-        navigateTo("lobby");
+            joinRoom(data);
+        }
+        else{
+            navigateTo("join")
+        }
     },
 
     handleCreateRoom(){
@@ -75,8 +82,10 @@ export const pageHandler = {
             "host": true,
         }
 
-        navigateTo("lobby");     
-    } 
+        createRoom(user); 
+    },
+
+
 }
 
 
@@ -93,11 +102,6 @@ export function navigateTo(page, data){
             window.history.pushState({}, "", "/");
             break;
         }
-        case "home": {
-            renderHomePage(pageParent);
-            window.history.pushState({}, "", "/home");
-            break;
-        }
 
         case "login": {
             renderLoginPage(pageParent);
@@ -111,9 +115,21 @@ export function navigateTo(page, data){
             break;
         }
 
+        case "home": {
+            renderHomePage(pageParent, data);
+            window.history.pushState({}, "", "/home");
+            break;
+        }
+
+        case "join": {
+            renderJoinPage(pageParent);
+            window.history.pushState({}, "", "/join");
+            break;
+        }
+
         case "lobby": {
             renderLobbyPage(pageParent, data);
-            window.history.pushState({}, "", "/lobby");
+            window.history.pushState({}, "", "/room");
             break;
         }
     }
@@ -133,6 +149,10 @@ export function handleRoute(){
 
         case "/register":
             navigateTo("register", pageParent);
+            break;
+
+        case "/room":
+            navigateTo("room", pageParent);
             break;
 
         default: 

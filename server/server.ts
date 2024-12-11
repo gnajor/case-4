@@ -25,7 +25,6 @@ function handleWsRequests(request: Request) {
                 handleJoinRoom(socket, clientMessage.data);
                 break;
         }
-
     };
 
     socket.onclose = () => {

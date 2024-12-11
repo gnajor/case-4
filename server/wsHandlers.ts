@@ -60,7 +60,10 @@ export function addUser(socket: WebSocket, user: Record<string, string>): void{
 
     send(socket, {
         event: "user:recieved",
-        data: {success: "User was recieved"}
+        data: {
+            id: user.id,
+            name: user.name,
+        }
     });
 }
 
@@ -79,6 +82,8 @@ export function handleCreateRoom(socket: WebSocket, user: Record<string, string 
         password: password,
     }
 
+    console.log(room);
+
     state.createRoom(room);
     state.makeUserHost(foundUser, user.host as boolean);
     state.addUserToRoom(foundUser, id);
@@ -86,8 +91,7 @@ export function handleCreateRoom(socket: WebSocket, user: Record<string, string 
     send(socket, {
         event: "room:created",
         data: {
-            success: "Room was created",
-            roomPassword: password,
+            roomPwd: password,
         }
     });
 }
@@ -107,11 +111,9 @@ export function handleJoinRoom(socket: WebSocket, data:Record<string, string>): 
     }
 
     broadcastToRoom({
-        event: "room:joined",
+        event: "room:user-joined",
         data: {
-            "roomId": specificRoom.id,
-            "roomPwd": specificRoom.password,
-            "name": specificUser.name,
+            name: specificUser.name,
         }
     });
 
@@ -124,9 +126,10 @@ export function handleJoinRoom(socket: WebSocket, data:Record<string, string>): 
     }
 
     send(socket, {
-        event: "user:list",
+        event: "room:you-joined",
         data: {
             users: users,
+            roomPwd: specificRoom.password,
         }
     });
 }

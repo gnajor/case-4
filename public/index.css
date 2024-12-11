@@ -16,6 +16,7 @@ html{
 
 body{
     margin:0;
+    /* background-color: var(--black-color); */
 }
 
 h1{
@@ -35,21 +36,45 @@ button{
     font-weight: bold;
 }
 
+input{
+    display: block;
+    border:none;
+    font-size: 1.4rem;
+}
+
+input:focus{
+	outline:0;
+}
+
+.arrow-back-container{
+    position: absolute;
+    padding: 1.5rem;
+}
+
 .button-container{
     display: flex;
     flex-direction: column;
     font-size: 1.5rem;
     gap:0.4rem;
+    margin-bottom: 3rem;
     padding: 0 10%;
 }
 
-.login-button{
+.big-button-container{
+    display: flex;
+    flex-direction: column;
+    font-size:2rem;
+    padding: 0 10%;
+    gap:0.6rem;
+}
+
+.yellow-button{
     clip-path: polygon(0 0, 100% 0, 100% 70%, 0% 100%);
     background-color: var(--accent-color-1);
     padding:1.75rem 0;
 }
 
-.register-button{
+.blue-button{
     clip-path: polygon(0 30%, 100% 0, 100% 100%, 0% 100%);
     background-color: var(--accent-color-2);
     color:var(--white-color);
@@ -59,9 +84,9 @@ button{
 
 /* entry-page css */
 
-body:has(#entry-page){
-    --h1-margin-top: 3rem;
 
+#wrapper:has(#entry-page){
+    --h1-margin-top: 3rem;
     margin-top:var(--h1-margin-top); /* h1 margin-top */
 }
 
@@ -73,16 +98,182 @@ body:has(#entry-page){
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
 }
+
+#entry-page::before{
+    content:"";
+    position: absolute;
+    background: linear-gradient(180deg, #000 20%, rgba(0, 0, 0, 0.00) 50%);
+    inset: 0;
+}
+
 
 #entry-page #game-title{
-    background: linear-gradient(180deg, #000 30%, rgba(0, 0, 0, 0.00) 100%);
-    box-shadow: 0px calc(0rem - var(--h1-margin-top)) 0px 0px var(--box-shadow-color);
     position: relative;
-    padding:0 10% 80% 10%;
 }
 
-#entry-page .button-container{
-    margin-bottom: 3rem;
+
+/* login-page  register-page*/
+
+
+#login-page::before,
+#register-page::before{
+    content:"";
+    position: absolute;
+    background: linear-gradient(180deg, #000 18%, rgba(0, 0, 0, 0.00) 40%);
+    inset: 0;
+}
+
+#login-page, 
+#register-page{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+}
+
+#login-page .page-title, 
+#register-page .page-title{
+    margin-top: 3rem;
+}
+
+
+#login-page #top,
+#register-page #top{
+    position: relative;
+}
+
+#login-page #bottom,
+#register-page #bottom{
+    background-image: url("./media/backgrounds/login-register-background.png");
+    background-position: 50% 0%;
+    display: flex;
+    flex-direction: column;
+    gap:20rem;
+}
+
+#login-page .input-container,
+#register-page .input-container{
+    position: relative;
+    padding:9rem 10% 0 10%;
+    display: flex;
+    flex-direction: column;
+    gap:1rem;
+}
+
+#login-page .input-container .name-label,
+#register-page .input-container .name-label,
+#login-page .input-container .pwd-label,
+#register-page .input-container .pwd-label{
+    font-size: 1.4rem;
+    color: var(--white-color);
+}
+
+#login-page .input-container input,
+#register-page .input-container input{
+    height: 2.5rem;
+    width: 100%;
+}
+
+#login-page .input-name-container input,
+#register-page .input-name-container input{
+    clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
+}
+
+#login-page .input-pwd-container input,
+#register-page .input-pwd-container input{
+    clip-path: polygon(0 20%, 100% 0, 100% 100%, 0 100%);
+}
+
+
+/* homePage */
+
+
+#wrapper:has(#home-page){
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+
+    background-image: url("./media/backgrounds/home-background.png");
+    background-size: cover;
+}
+
+#home-page{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap:8rem;
+}
+
+#home-page .page-title{
+
+}
+
+#home-page #rule-button{
+    position: absolute;
+}
+
+#home-page .big-button-container button{
+    padding: 2.8rem 0;
+    width: 100%;
+}
+
+#home-page #join-button{
+    clip-path: polygon(0 0, 100% 0, 98% 78%, 0 100%);
+    background-color: var(--accent-color-1);
+}
+
+#home-page #host-button{
+    clip-path: polygon(2% 22%, 100% 0, 100% 100%, 0 100%);
+    background-color: var(--accent-color-2);
+    color:var(--white-color);
+}
+
+
+/* joinPage */
+
+
+#wrapper:has(#join-page){
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    background-image: url("./media/backgrounds/join-background.png");
+    background-size: cover;
+}
+
+#join-page{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding:0 10%;
+    color:var(--white-color);
+    gap:1.5rem;
+}
+
+#join-page input{
+    height:4rem;
+    clip-path: polygon(0 20%, 100% 0, 100% 100%, 0% 100%);
+    font-size: 1.8rem;
+    width: 100%;
+}
+
+#join-page .name-label{
+    font-size: 1.4rem;
+}
+
+#join-page .button-container{
+    padding:0;
+}
+
+#join-page .button-container button{
+    width: 100%;
+}
+
+#join-page .arrow-back-container{
+    top:0;
+    left: 0;
 }

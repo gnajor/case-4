@@ -9,11 +9,13 @@ export function renderLoginPage(parentId){
     }
 
     parent.innerHTML = `<div id="login-page" class="page">
-                            <div class="arrow-back-container"></div>
-                            <div class="page-title">
-                                <h1 id="login-title">LOGIN</h1>
+                            <div id="top">
+                                <div class="arrow-back-container"></div>
+                                <div class="page-title">
+                                    <h1 id="login-title">LOGIN</h1>
+                                </div>
                             </div>
-                            <div id="bottom-half">
+                            <div id="bottom">
                                 <div class="input-container">
                                     <div class="input-name-container">
                                         <div class="name-label">USERNAME</div>
@@ -24,14 +26,13 @@ export function renderLoginPage(parentId){
                                         <input type="password">
                                     </div>
                                 </div>
-
                                 <div class="button-container">
-                                    <button class="login-button">LOGIN</button>
+                                    <button class="yellow-button">LOGIN</button>
                                 </div>
                             </div>
                         </div>`;
 
-    const loginButton = parent.querySelector(".login-button");
+    const loginButton = parent.querySelector(".yellow-button");
     const arrowBackContainer = parent.querySelector(".arrow-back-container");
     renderBackArrow(arrowBackContainer, "entry");
 

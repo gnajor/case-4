@@ -9,27 +9,30 @@ export function renderRegisterPage(parentId){
     }
 
     parent.innerHTML = `<div id="register-page" class="page">
-                            <div class="arrow-back-container"></div>
-                            <div class="page-title">
-                                <h1>CREATE YOUR ACCOUNT</h1>
-                            </div>
-                            <div class="input-container">
-                                <div class="input-name-container">
-                                    <div class="name-label">USERNAME</div>
-                                    <input type="text">
-                                </div>
-                                <div class="input-pwd-container">
-                                    <div class="pwd-label"></div>
-                                    <input type="password">
+                            <div id="top">
+                                <div class="arrow-back-container"></div>
+                                <div class="page-title">
+                                    <h1>CREATE YOUR ACCOUNT</h1>
                                 </div>
                             </div>
-
-                            <div class="button-container">
-                                <button class="register-button">REGISTER</button>
+                            <div id="bottom">
+                                <div class="input-container">
+                                    <div class="input-name-container">
+                                        <div class="name-label">USERNAME</div>
+                                        <input type="text">
+                                    </div>
+                                    <div class="input-pwd-container">
+                                        <div class="pwd-label">PASSWORD</div>
+                                        <input type="password">
+                                    </div>
+                                </div>
+                                <div class="button-container">
+                                    <button class="blue-button">REGISTER</button>
+                                </div>
                             </div>
                         </div>`;
 
-    const registerButton = parent.querySelector(".register-button");
+    const registerButton = parent.querySelector(".blue-button");
     const arrowBackContainer = parent.querySelector(".arrow-back-container");
     renderBackArrow(arrowBackContainer, "entry");
 

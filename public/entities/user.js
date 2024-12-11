@@ -11,23 +11,28 @@ export class User{
         User.userInstances.push(this);
     }
 
-    create(parentId, imgSrc){
-        const parent = document.querySelector("#" + parentId);
-
-        if(!parent){
-            return console.error("Parent Not Found");
-        }
-        this.parent = parent;
-        this.img = imgSrc;
-
+    create(imgSrc){
         const userElement = document.createElement("div");
-        const userProfile = document.createElement("img");
-        userProfile.setAttribute("src", imgSrc);
+        userElement.id = this.name;
+        userElement.className = "user";
+
+        userElement.innerHTML =`<div id="profile">
+                                    <div id="profile-pic">
+                                        <img src="${imgSrc}">
+                                    </div>
+                                </div>
+                                <div id="name">${this.name}</div>`;
 
         this.element = userElement;
     }
 
-    render(){
+    render(parentId){
+        const parent = document.querySelector("#" + parentId);
+        
+        if(!parent){
+            return console.error("Parent Not Found");
+        }
+        this.parent = parent;
         this.parent.appendChild(this.element);
     }
 

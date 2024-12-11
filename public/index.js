@@ -1,5 +1,5 @@
 import { handleRoute, pageHandler, navigateTo} from "./pageHandler/pageHandler.js";
-import { PubSub } from "./utils/pubsub.js";
+import { User } from "./entities/user.js";
 
 const socket = new WebSocket("ws://localhost:8000/");
 
@@ -21,13 +21,28 @@ socket.addEventListener("message", (event) => {
     const serverToClientMessage = JSON.parse(event.data);
     
     switch(serverToClientMessage.event){
+        case "user:recieved":{
+            const user = serverToClientMessage.data;
+            new User(user.id, user.name);
+            break;
+        } 
+
         case "user:list": {
-            const users = serverToClientMessage.data.users;
-            navigateTo("lobby", users);
+            navigateTo("lobby", serverToClientMessage.data);
             break;
         }
 
-        case "room:joined": {
+        case "room:user-joined": {
+            navigateTo("lobby", serverToClientMessage.data);
+            break;
+        }
+
+        case "room:you-joined": {
+            navigateTo("lobby", serverToClientMessage.data);
+            break
+        }
+
+        case "room:created": {
             navigateTo("lobby", serverToClientMessage.data);
             break;
         }
