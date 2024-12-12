@@ -1,4 +1,5 @@
 import { encodeHex } from "@std/encoding/hex";
+import { extname } from "@std/path/extname";
 
 export async function encrypt(str: string): Promise<string>{
     const strBuffer = new TextEncoder().encode(str); //turns string into a Uint8array AKA an array of bytes AKA ArrayBuffer
@@ -33,4 +34,21 @@ export function generateRoomPassword(length: number = 6): string{
     }
 
     return password;
+}
+
+export async function getImages(directory: string): Promise<string[]> {
+    const images = [];
+
+    for await(const file of Deno.readDir(directory)){
+        if(file.isFile){
+            const name = file.name;
+            const type = extname(name).toLowerCase();
+
+            if(type === ".png" || type === ".jpg" || type === ".jpeg" || ".gif"){
+                images.push(file.name);
+            }
+        }
+    }
+
+    return images;
 }

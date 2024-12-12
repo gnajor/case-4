@@ -23,7 +23,8 @@ socket.addEventListener("message", (event) => {
     switch(serverToClientMessage.event){
         case "user:recieved":{
             const user = serverToClientMessage.data;
-            new User(user.id, user.name);
+            const you = new User(user.id, user.name);
+            you.setImages(user.images);
             break;
         } 
 

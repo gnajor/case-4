@@ -14,28 +14,31 @@ export function renderLobbyPage(parentId, data){
                                 <h1>Room Code: ${data.roomPwd}</h1>
                             </div>
                             <div id="you-container">
-                                <div id="arrow-right"></div>
+                                <div id="arrow-left" class="arrow"><</div>
                                 <div id="you"></div>
-                                <div id="arrow-left"></div>
+                                <div id="arrow-right" class="arrow">></div>
                             </div>
                             <div id="users-container"></div>
                             <div class="button-container">
-                                <button class="login-button" id="ready-button">Ready</button>
+                                <button class="yellow-button" id="ready-button">Ready</button>
                             </div>
                         </div>`;
 
     const you = User.userInstances[0];
-    you.create();
     you.render("you");
+
+    console.log(you.imgContainer)
+
+    you.renderProfileImgs();
 
 
     console.log(data.users);
     if(data.users){
-
         for(const user of data.users){
-            const userInstance = new User(user.id, user.name);
-            userInstance.create("");
-            userInstance.render("users-container");
+            if(user.id !== you.id){
+                const userInstance = new User(user.id, user.name);
+                userInstance.render("users-container");
+            }
         }
     }
     

@@ -1,6 +1,6 @@
 import { State, OnlineUser, Room } from "../protocols/protocols.ts";
 import { ServerToClientMessage } from "../protocols/protocols.ts";
-import { generateId, generateRoomPassword } from "../utils/utils.ts";
+import { generateId, generateRoomPassword, getImages } from "../utils/utils.ts";
 
 const state: State = {
     users: [],
@@ -49,7 +49,7 @@ function broadcastToRoom(payload:ServerToClientMessage){
     }
 }
 
-export function addUser(socket: WebSocket, user: Record<string, string>): void{
+export async function addUser(socket: WebSocket, user: Record<string, string>): Promise<void>{
     const onlineUser: OnlineUser = {
         id: user.id,
         name: user.name,
@@ -58,11 +58,14 @@ export function addUser(socket: WebSocket, user: Record<string, string>): void{
 
     state.createUser(onlineUser);
 
+    const images = await getImages("./public/media/profiles");
+
     send(socket, {
         event: "user:recieved",
         data: {
             id: user.id,
             name: user.name,
+            images: images
         }
     });
 }

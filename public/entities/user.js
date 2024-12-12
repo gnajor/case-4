@@ -4,26 +4,29 @@ export class User{
     constructor(id, name){
         this.id = id;
         this.name = name;
+        this.imgs = null;
         this.host = false;
         this.parent = null;
-        this.element = null;
+        this.element = this.create();
         this.img = null;
+        this.imgContainer = null;
         User.userInstances.push(this);
     }
 
-    create(imgSrc){
+    create(){
         const userElement = document.createElement("div");
         userElement.id = this.name;
         userElement.className = "user";
 
-        userElement.innerHTML =`<div id="profile">
-                                    <div id="profile-pic">
-                                        <img src="${imgSrc}">
-                                    </div>
+        userElement.innerHTML =`<div class="profile">
+                                    <div class="profile-pics"></div>
                                 </div>
-                                <div id="name">${this.name}</div>`;
+                                <div class="name">${this.name}</div>`;
 
-        this.element = userElement;
+        const profilePics = userElement.querySelector(".profile-pics");
+        this.imgContainer = profilePics;
+
+        return userElement;
     }
 
     render(parentId){
@@ -36,11 +39,23 @@ export class User{
         this.parent.appendChild(this.element);
     }
 
+    renderProfileImgs(){
+        const path = "../media/profiles/";
+
+        for(const image of this.imgs){
+            this.imgContainer.innerHTML += `<img src="${path + image}">`;
+        }
+    }
+
+    setImages(images){
+        this.imgs = images;
+    }
+
     becomeHost(){
         this.host = true;
     }
 
-    deleteUser(){
-        
+    setCurrentImage(){
+
     }
 }

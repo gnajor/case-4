@@ -1,6 +1,6 @@
 export interface ServerToClientMessage{
     event: string,
-    data: Record<string, string | Array<OnlineUser>>
+    data: Record<string, string | OnlineUser[] | string[]>
 }
 
 export interface ClientToServerMessage{
@@ -15,7 +15,7 @@ export interface UserDb{
     id: string,
     name: string,
     password: string,
-    profilePic?: string, 
+    profilePic: string, 
 }
 
 export interface Category{

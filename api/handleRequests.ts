@@ -41,6 +41,7 @@ export async function handleRequests(request: Request): Promise<Response>{
             id: id,
             name: name,
             password: encryptedPassword,
+            profilePic: ""
         }
 
         users.push(user);
@@ -112,5 +113,15 @@ export async function handleRequests(request: Request): Promise<Response>{
         }), {status: 202});
     }
 
+    if(url.pathname === "/api/user" && request.method === "PATCH"){
+        const {userId, imageSrc} = await request.json();
+
+        for(const user of users){
+            if(user.id === userId){
+                user.profilePic = imageSrc;
+            }
+        }
+    }
+    
     return new Response("Path Not Found",{status: 404});
 }

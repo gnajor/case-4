@@ -81,6 +81,16 @@ input:focus{
     padding:1.75rem 0;
 }
 
+.user{
+    color: var(--white-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.arrow{
+    color: var(--white-color);
+    font-size: 2rem;
+}
 
 /* entry-page css */
 
@@ -277,3 +287,45 @@ input:focus{
     top:0;
     left: 0;
 }
+
+
+/* lobbyPage */
+
+
+#lobby-page{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+
+    background-image: url("./media/backgrounds/lobby-background.png");
+    background-size: cover;
+}
+
+#lobby-page #profile{
+    display: flex;
+    flex-direction: column;
+}
+
+#lobby-page #you-container{
+    display: flex;
+    justify-content: center;
+}
+
+#lobby-page #you .name{
+    font-size: 2rem;
+}
+
+#lobby-page #users{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+
+
+
+
+
