@@ -10,7 +10,7 @@ export function serveFileOrDir(request: Request){
     }
 
     if(pathname === "/" || !extname(pathname)){
-        return serveFile(request, "./public/index.html");
+        return serveFile(request, Deno.cwd() + "/public/index.html");
     }
 
     return serveDir(request, {

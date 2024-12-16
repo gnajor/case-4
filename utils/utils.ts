@@ -14,12 +14,12 @@ export function generateRandString(length: number = 32): string{
     return Array.from(numArray, (num) => num.toString(16)).join(""); //For each num make them into a hexadecimal conjoin them into a string;
 }
 
-//min inclusive
-//max exclusive
 export function generateId(): string{
     return crypto.randomUUID()
 }
 
+//min inclusive
+//max exclusive
 export function getRandomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -36,6 +36,7 @@ export function generateRoomPassword(length: number = 6): string{
     return password;
 }
 
+//should be in the api
 export async function getImages(directory: string): Promise<string[]> {
     const images = [];
 

@@ -26,7 +26,7 @@ export function renderHomePage(parentId, data){
     });
 
     hostButton.addEventListener("click", () => {
-        pageHandler.handleCreateRoom();
+        pageHandler.handleRoomSettings();
     });
 }
 

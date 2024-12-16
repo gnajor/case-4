@@ -1,16 +1,31 @@
 import { apiCom } from "../apiCom/apiCom.js";
-import { addUserToWs, createRoom, joinRoom } from "../index.js";
+import { addUserToWs, createRoom, joinRoom, addNewUserImage, makeUserReady, makeUserUnready, chosenCategory} from "../index.js";
 import { renderEntryPage } from "../pages/entryPage/entryPage.js";
 import { renderHomePage } from "../pages/homePage/homePage.js";
 import { renderLobbyPage } from "../pages/lobbyPage/lobbyPage.js";
 import { renderLoginPage } from "../pages/loginPage/loginPage.js";
 import { renderRegisterPage } from "../pages/registerPage/registerPage.js";
 import { renderJoinPage } from "../pages/joinPage/joinPage.js";
+import { renderPreGamePage } from "../pages/preGamePage/preGamepage.js";
+import { renderCategoryPage } from "../pages/categoryPage/categoryPage.js";
+import * as category from "../entities/category.js";
+import { PubSub } from "../utils/pubsub.js";
 
 const pageParent = "wrapper";
 
 export const pageHandler = {
     currentUser: null,
+
+    async handleCategories(){
+        const resource = await apiCom("all", "category:all");
+
+        if(resource){
+            PubSub.publish({
+                event: "setCategories",
+                details: resource
+            });
+        }
+    },
 
     async handleEntry(){
         const token = localStorage.getItem("token");
@@ -40,6 +55,8 @@ export const pageHandler = {
         }
     },
 
+    /* The top two methods should probably not be in this file as this not go from comonent => server but client => server */
+
     async handleLogin(user){
         const resource = await apiCom(user, "user:login");
 
@@ -59,7 +76,6 @@ export const pageHandler = {
 
     async handleRegister(user){
         const resource = await apiCom(user, "user:register");
-        console.log(resource);
     },
 
     handleJoinRoom(roomPwd){
@@ -72,20 +88,61 @@ export const pageHandler = {
             joinRoom(data);
         }
         else{
-            navigateTo("join")
+            navigateTo("join");
         }
     },
 
-    handleCreateRoom(){
+    handleRoomSettings(setting){
+        if(setting){
+            this.handleCreateRoom(setting);
+        }
+        else{
+            navigateTo("roomsettings");
+        }
+    },
+
+    handleCreateRoom(setting){
         const user = {
             "id": this.currentUser.id,
+            "matchAmount": setting,
             "host": true,
         }
 
         createRoom(user); 
     },
 
+    handleProfileChange(img){
+        const user = {
+            "id": this.currentUser.id,
+            "img": img
+        }
+        addNewUserImage(user);
+    },
 
+    handleUserReadyStatus(status){
+        const user = {
+            "id": this.currentUser.id,
+            "ready": status
+        }
+
+        if(status){
+            makeUserReady(user);
+        }
+        else{
+            makeUserUnready(user);
+        }
+    },
+
+    handleChosenCategory(category){
+        const data = {
+            "userId": this.currentUser.id,
+            "categoryId": category.id,
+            "img": category.img,
+            "questions": category.questions,
+        }
+
+        chosenCategory(data);
+    }
 }
 
 
@@ -97,41 +154,46 @@ export function navigateTo(page, data){
     }
 
     switch(page){
-        case "entry": {
+        case "entry": 
             renderEntryPage(pageParent);
             window.history.pushState({}, "", "/");
             break;
-        }
 
-        case "login": {
+        case "login": 
             renderLoginPage(pageParent);
             window.history.pushState({}, "", "/login");
             break;
-        }
 
-        case "register": {
+        case "register": 
             renderRegisterPage(pageParent);
             window.history.pushState({}, "", "/register");
             break;
-        }
 
-        case "home": {
+        case "home": 
             renderHomePage(pageParent, data);
             window.history.pushState({}, "", "/home");
             break;
-        }
 
-        case "join": {
+        case "roomsettings": 
+            renderPreGamePage(pageParent)
+            window.history.pushState({}, "", "/room/settings");
+            break;
+        
+
+        case "join": 
             renderJoinPage(pageParent);
             window.history.pushState({}, "", "/join");
             break;
-        }
+        
 
-        case "lobby": {
+        case "lobby": 
             renderLobbyPage(pageParent, data);
             window.history.pushState({}, "", "/room");
             break;
-        }
+        
+        case "category":
+            renderCategoryPage(pageParent, data);
+            window.history.pushState({}, "", "/room/category")
     }
 }
 
@@ -149,6 +211,10 @@ export function handleRoute(){
 
         case "/register":
             navigateTo("register", pageParent);
+            break;
+
+        case "/room/settings":
+            navigateTo("home", pageParent);
             break;
 
         case "/room":

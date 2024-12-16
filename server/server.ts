@@ -1,6 +1,6 @@
 import { serveFileOrDir } from "./serveFileOrDir.ts";
-import { ServerToClientMessage, ClientToServerMessage } from "../protocols/protocols.ts";
-import { addUser, handleCreateRoom, handleJoinRoom, send } from "./wsHandlers.ts";
+import { ClientToServerMessage } from "../protocols/protocols.ts";
+import { addUser, handleCreateRoom, handleJoinRoom , handleProfileChange, handleUserReady, handleUserUnready, handleCategoryChoose, handleCategoryChooser, handleLobbyTimer} from "./wsHandlers.ts";
 
 function handleWsRequests(request: Request) {
     const { socket, response } = Deno.upgradeWebSocket(request);
@@ -17,6 +17,18 @@ function handleWsRequests(request: Request) {
                 addUser(socket, clientMessage.data);
                 break;
 
+            case "user:new-image":
+                handleProfileChange(socket, clientMessage.data);
+                break;
+
+            case "user:ready": 
+                handleUserReady(socket, clientMessage.data);
+                break;
+
+            case "user:unready":
+                handleUserUnready(socket, clientMessage.data);
+                break;
+
             case "room:create":
                 handleCreateRoom(socket, clientMessage.data);
                 break;
@@ -24,6 +36,21 @@ function handleWsRequests(request: Request) {
             case "room:join":
                 handleJoinRoom(socket, clientMessage.data);
                 break;
+
+            case "category:chooser":
+                handleCategoryChooser(socket, clientMessage.data);
+                console.log("poop"); //twice??
+                break;
+
+/*             case "category:chosen":
+                handleCategoryChoose(socket, clientMessage.data);
+                break; */
+
+            case "lobby-timer:start":
+                handleLobbyTimer(socket, clientMessage.data);
+                console.log("cum") //four times???
+                break;
+
         }
     };
 

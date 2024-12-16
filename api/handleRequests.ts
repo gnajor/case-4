@@ -2,13 +2,17 @@ import { UserDb, Category } from "../protocols/protocols.ts";
 import { encrypt, generateRandString } from "../utils/utils.ts";
 
 let users: UserDb[] = [];
-const categories: Category[] = [];
+let categories: Category[] = [];
 
 try{
-    const userDbString = await Deno.readTextFile("./db/users.json");
+    const usersDbString = await Deno.readTextFile("./db/users.json");
+    const categoriesDbString = await Deno.readTextFile("./db/categories.json");
 
-    if(userDbString.length > 0){
-        users = JSON.parse(userDbString);
+    if(usersDbString.length > 0){
+        users = JSON.parse(usersDbString);
+    }
+    if(categoriesDbString.length > 0){
+        categories = JSON.parse(categoriesDbString);
     }
 } 
 catch(error){
@@ -114,12 +118,24 @@ export async function handleRequests(request: Request): Promise<Response>{
     }
 
     if(url.pathname === "/api/user" && request.method === "PATCH"){
-        const {userId, imageSrc} = await request.json();
+        const {userId, imgSrc} = await request.json();
 
         for(const user of users){
             if(user.id === userId){
-                user.profilePic = imageSrc;
+                user.profilePic = imgSrc;
             }
+        }
+        await Deno.writeTextFile("./db/users.json", JSON.stringify(users, null, 4));
+    }
+
+    if(url.pathname.startsWith("/api/category") && request.method === "GET"){
+        const urlCategory = url.searchParams.get("name");
+
+        if(urlCategory === "all"){
+            return new Response(JSON.stringify(categories));
+        }
+        else{
+            return new Response(JSON.stringify({error: "Category not found"}), {status: 404});
         }
     }
     

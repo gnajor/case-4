@@ -33,6 +33,12 @@ export async function apiCom(data, action){
             return resource;
         }
 
+        case "category:all": {
+            options.method = "GET";
+            const resource = await fetcher(`../../api/category/?name=${data}`, options);
+            return resource
+        }
+
         default: {
             console.warn("Unknown action: " + action);
             return null;
@@ -64,7 +70,6 @@ async function fetcher(url, options){
         return await response.json();
     }
     catch(error){
-
         console.error(error);
     }
 }
