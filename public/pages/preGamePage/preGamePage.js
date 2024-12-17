@@ -22,7 +22,6 @@ export function renderPreGamePage(parentId){
     
     twoMatches.addEventListener("click", chooseMatchesAmount);
     fourMatches.addEventListener("click", chooseMatchesAmount);
-
     sixMatches.addEventListener("click", chooseMatchesAmount);
 
     function chooseMatchesAmount(event){

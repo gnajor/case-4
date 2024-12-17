@@ -1,6 +1,6 @@
 import { serveFileOrDir } from "./serveFileOrDir.ts";
 import { ClientToServerMessage } from "../protocols/protocols.ts";
-import { addUser, handleCreateRoom, handleJoinRoom , handleProfileChange, handleUserReady, handleUserUnready, handleCategoryChoose, handleCategoryChooser, handleLobbyTimer} from "./wsHandlers.ts";
+import { addUser, handleCreateRoom, handleJoinRoom , handleProfileChange, handleUserReady, handleUserUnready, handleCategoryChoose, handleStartGame, handleLobbyTimer} from "./wsHandlers.ts";
 
 function handleWsRequests(request: Request) {
     const { socket, response } = Deno.upgradeWebSocket(request);
@@ -37,20 +37,17 @@ function handleWsRequests(request: Request) {
                 handleJoinRoom(socket, clientMessage.data);
                 break;
 
-            case "category:chooser":
-                handleCategoryChooser(socket, clientMessage.data);
-                console.log("poop"); //twice??
+            case "start:game": 
+                handleStartGame(socket, clientMessage.data);
                 break;
 
-/*             case "category:chosen":
+            case "category:chosen":
                 handleCategoryChoose(socket, clientMessage.data);
-                break; */
+                break;
 
             case "lobby-timer:start":
                 handleLobbyTimer(socket, clientMessage.data);
-                console.log("cum") //four times???
                 break;
-
         }
     };
 

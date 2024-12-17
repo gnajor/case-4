@@ -22,7 +22,7 @@ window.addEventListener("load", () => {
 socket.addEventListener("message", (event) => {
     const serverToClientMessage = JSON.parse(event.data);
     
-    switch(serverToClientMessage.event){
+    switch(serverToClientMessage){
         case "user:recieved":{
             PubSub.publish({
                 event: "user:recieved",
@@ -60,8 +60,7 @@ socket.addEventListener("message", (event) => {
         }
 
         case "room:readied": {
-            console.log("com")
-            getRandomCategoryUser(serverToClientMessage.data);
+            startGame(serverToClientMessage.data);
             break;
         }
 
@@ -74,7 +73,6 @@ socket.addEventListener("message", (event) => {
         }
 
         case "room:you-joined": {
-            console.log("you joined")
             navigateTo("lobby", serverToClientMessage.data);
             break
         }
@@ -84,25 +82,22 @@ socket.addEventListener("message", (event) => {
             break;
         }
 
-        case "category:chooser-chosen": {
-            console.log("poop") //runs two times????
+        case "game:started": {   
             PubSub.publish({
                 event: "category:chooser-chosen",
-                details: serverToClientMessage.data,
-            });
-            startTimer(serverToClientMessage.data);
-            break;
-        }
-
-        case "lobby-timer:started": {
-            console.log("cum") //runs four times??????
+                details: serverToClientMessage.data
+            })    
             navigateTo("category", serverToClientMessage.data);
             break;
         }
 
-        case "timer:ticking":
-            
+        case "timer:ticking": {
+            PubSub.publish({
+                event: "timer:ticking",
+                details: serverToClientMessage.data.timer
+            });
             break;
+        }
     }
 });
 
@@ -110,20 +105,9 @@ socket.addEventListener("close", () => {
     console.log("connection closed");
 });
 
-function startTimer(data){
+function startGame(data){
     const message = {
-        action: "lobby-timer:start",
-        data: {
-            roomId: data.roomId
-        },
-    }
-
-    socket.send(JSON.stringify(message));
-}
-
-function getRandomCategoryUser(data){
-    const message = {
-        action: "category:chooser",
+        action: "start:game", //no duplication
         data: data
     }
 

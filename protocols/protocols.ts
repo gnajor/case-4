@@ -54,6 +54,7 @@ export interface State{
     users: OnlineUser[],
     rooms: Room[],
     timer: timer,
+    categories: Category[],
     getUser(id: string): OnlineUser | undefined,
     getUsers(id: string): OnlineUser[] | undefined,
     getRandomUser(users: OnlineUser[]): OnlineUser,

@@ -4,10 +4,10 @@ import { generateId, generateRoomPassword, getImages, getRandomInt } from "../ut
 const state: State = {
     users: [],
     rooms: [],
+    categories: JSON.parse(await Deno.readTextFile("./db/categories.json")),
     timer: {
         duration: 20,
     },
-
 
     getUser(userId){
         return this.users.find(user => user.id === userId);
@@ -83,6 +83,10 @@ function broadcastToRoom(socket: WebSocket | undefined, roomId: string, payload:
 
     for(const user of roomUsers){
         if(user.socket !== socket){
+            if(payload.event === "game:start"){
+                console.log(user);
+            }
+
             send(user.socket, payload);
         }
     }
@@ -247,19 +251,20 @@ export function handleUserReady(socket: WebSocket, data:Record<string, string | 
     });
 
     const users = state.getUsers(specificUser.roomId as string);
+    console.log(users?.length);
 
     if(!users){
-        return;
+        return console.error("no users in room");
     }
 
-    else if(users.length < 1){
-        return console.error("You have to be more than one player")
+    else if(users.length === 1){
+        return console.error("You have to be more than one player");
     }
-
+    
     const everybodyReady = state.checkAllUsersReady(users);
 
     if(everybodyReady){
-        broadcastToRoom(undefined, specificUser.roomId as string, {
+        send(specificUser.socket, {
             event: "room:readied",
             data: {
                 "roomId": specificUser.roomId as string,
@@ -270,9 +275,11 @@ export function handleUserReady(socket: WebSocket, data:Record<string, string | 
     //make users unready later//
 }
 
-export function handleCategoryChooser(socket: WebSocket, data:Record<string, string>){
+export function handleStartGame(socket: WebSocket, data:Record<string, string>){
     const roomId = data.roomId;
     const roomUsers = state.getUsers(roomId);
+    const timerStartTime: number = Date.now();
+    const event = "timer:ticking";
     
     if(!roomUsers){
         return;
@@ -281,21 +288,33 @@ export function handleCategoryChooser(socket: WebSocket, data:Record<string, str
     const randomRoomUser = state.getRandomUser(roomUsers);
     state.makeUserCategoryChooser(randomRoomUser);
 
+    const timerId = setInterval(() => {
+        TimerHandler(
+            timerStartTime,
+            data.roomId,
+            timerId,
+            event,
+            () => {},
+        );
+    }, 1000);
+
+
     broadcastToRoom(undefined, roomId as string, {
-        event: "category:chooser-chosen",
+        event: "game:started",
         data: {
             "id": randomRoomUser.id,
             "roomId": roomId,
+            "time": state.timer.duration,
         }
     });
 }
 
-function TimerHandler(startTime: number, roomId: string, timerId: number, event: string, onTimeOut: VoidFunction){
+
+function TimerHandler(startTime: number, roomId: string, timerId: number, event: string, onTimeOut: VoidFunction){ 
     const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
     const remainingTime = Math.max(state.timer.duration - elapsedTime, 0);
 
     if(remainingTime === 0){
-
         broadcastToRoom(undefined, roomId, {
             event: "lobby-timer:ended",
             data: {}
@@ -311,7 +330,6 @@ function TimerHandler(startTime: number, roomId: string, timerId: number, event:
             }
         });
     }
-
 }
 
 export function handleLobbyTimer(socket: WebSocket, data:Record<string, string>){
@@ -319,7 +337,7 @@ export function handleLobbyTimer(socket: WebSocket, data:Record<string, string>)
     const event = "timer:ticking";
 
     broadcastToRoom(undefined, data.roomId, {
-        event: "lobby-timer:started",
+        event: "game:start",
         data: {
             time: state.timer.duration,
         }
@@ -334,23 +352,25 @@ export function handleLobbyTimer(socket: WebSocket, data:Record<string, string>)
             () => {},
         );
     }, 1000);
-
-
 }
 
 export function handleCategoryChoose(socket: WebSocket, data:Record<string, string>){
-/*     const user = state.getUser(data.userId);
+    const user = state.getUser(data.userId);
 
-    if(user?.categoryChooser !== true || !user){
+    if(!user){
         return;
     }
 
-    broadcastToRoom(undefined, roomId as string, {
-        event: "category:chooser-chosen",
-        data: {
-            "id": randomRoomUser.id,
-        }
-    }); */
+    const roomId = user.roomId;
+
+    if(user.categoryChooser !== true || !user){
+        broadcastToRoom(undefined, roomId as string, {
+            event: "category:chosen",
+            data: {
+                roomId: userId.
+            }
+        });
+    }
 }
 
 function handleLeaveRoom(socket: WebSocket, user: OnlineUser): void{

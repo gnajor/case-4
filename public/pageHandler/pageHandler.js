@@ -137,10 +137,7 @@ export const pageHandler = {
         const data = {
             "userId": this.currentUser.id,
             "categoryId": category.id,
-            "img": category.img,
-            "questions": category.questions,
         }
-
         chosenCategory(data);
     }
 }

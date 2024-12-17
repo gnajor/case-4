@@ -21,7 +21,6 @@ export function renderJoinPage(parentId){
 
     const joinLobbyButton = parent.querySelector(".yellow-button");
     const arrowBack = parent.querySelector(".arrow-back-container");
-    renderBackArrow(arrowBack, "home");
     
     joinLobbyButton.addEventListener("click", () => {
         const roomCodeInput = parent.querySelector("input").value;
