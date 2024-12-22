@@ -12,23 +12,21 @@ export function renderRegisterPage(parentId){
                             <div id="top">
                                 <div class="arrow-back-container"></div>
                                 <div class="page-title">
-                                    <h1>CREATE YOUR ACCOUNT</h1>
+                                    <h1>Create Your Account</h1>
                                 </div>
-                            </div>
-                            <div id="bottom">
                                 <div class="input-container">
                                     <div class="input-name-container">
-                                        <div class="name-label">USERNAME</div>
+                                        <div class="label">USERNAME</div>
                                         <input type="text">
                                     </div>
                                     <div class="input-pwd-container">
-                                        <div class="pwd-label">PASSWORD</div>
+                                        <div class="label">PASSWORD</div>
                                         <input type="password">
                                     </div>
                                 </div>
-                                <div class="button-container">
-                                    <button class="blue-button">REGISTER</button>
-                                </div>
+                            </div>
+                            <div class="button-container">
+                                <button class="blue-button">REGISTER</button>
                             </div>
                         </div>`;
 

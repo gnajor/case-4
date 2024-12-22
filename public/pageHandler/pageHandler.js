@@ -1,5 +1,5 @@
 import { apiCom } from "../apiCom/apiCom.js";
-import { addUserToWs, createRoom, joinRoom, addNewUserImage, makeUserReady, makeUserUnready, chosenCategory} from "../index.js";
+import { addUserToWs, createRoom, joinRoom, addNewUserImage, makeUserReady, makeUserUnready, chosenCategory, userVote, goBackToMenu, playAgain, userLeave} from "../index.js";
 import { renderEntryPage } from "../pages/entryPage/entryPage.js";
 import { renderHomePage } from "../pages/homePage/homePage.js";
 import { renderLobbyPage } from "../pages/lobbyPage/lobbyPage.js";
@@ -9,7 +9,12 @@ import { renderJoinPage } from "../pages/joinPage/joinPage.js";
 import { renderPreGamePage } from "../pages/preGamePage/preGamepage.js";
 import { renderCategoryPage } from "../pages/categoryPage/categoryPage.js";
 import * as category from "../entities/category.js";
+import * as categoryPage from "../pages/categoryPage/categoryPage.js";
 import { PubSub } from "../utils/pubsub.js";
+import { renderPromptPage } from "../pages/promptPage/promptPage.js";
+import { renderVotingPage } from "../pages/votingPage/votingPage.js";
+import { renderVotingResultPage } from "../pages/votingResultPage/votingResultPage.js";
+import { renderLeaderboardPage } from "../pages/leaderboardPage/leaderboardPage.js";
 
 const pageParent = "wrapper";
 
@@ -72,6 +77,16 @@ export const pageHandler = {
             navigateTo("home", this.currentUser.name);
             addUserToWs(this.currentUser);
         }
+    },
+
+    handleLogout(){
+        const data = {
+            "userId": this.currentUser.id
+        }
+        
+        localStorage.clear();
+
+        userLeave(data);
     },
 
     async handleRegister(user){
@@ -139,6 +154,28 @@ export const pageHandler = {
             "categoryId": category.id,
         }
         chosenCategory(data);
+    },
+
+    handleVoting(userId){
+        const data = {
+            "voteId": userId,
+            "votedId": this.currentUser.id
+        }
+        userVote(data);
+    },
+
+    handlePlayAgain(){
+        const data = {
+            "userId": this.currentUser.id
+        }
+        playAgain(data);
+    },
+
+    handleBackToMenu(){
+        const data = {
+            "userId": this.currentUser.id
+        }
+        goBackToMenu(data);
     }
 }
 
@@ -175,7 +212,6 @@ export function navigateTo(page, data){
             renderPreGamePage(pageParent)
             window.history.pushState({}, "", "/room/settings");
             break;
-        
 
         case "join": 
             renderJoinPage(pageParent);
@@ -190,7 +226,27 @@ export function navigateTo(page, data){
         
         case "category":
             renderCategoryPage(pageParent, data);
-            window.history.pushState({}, "", "/room/category")
+            window.history.pushState({}, "", "/room/category");
+            break;
+
+        case "prompt":
+            renderPromptPage(pageParent, data);
+            window.history.pushState({}, "", "/room/prompt");
+            break;
+
+        case "voting":
+            renderVotingPage(pageParent, data);
+            window.history.pushState({}, "", "/room/voting");
+            break;
+
+        case "results":
+            renderVotingResultPage(pageParent, data);
+            window.history.pushState({}, "", "/room/voting/results");
+            break;
+
+        case "leaderboard":
+            renderLeaderboardPage(pageParent, data);
+            window.history.pushState({}, "", "/room/leaderboard");
     }
 }
 

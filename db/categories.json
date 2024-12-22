@@ -1,116 +1,146 @@
 [
     {
-        "id":"550e8400-e29b-41d4-a716-446655440000",
+        "id": "550e8400-e29b-41d4-a716-446655440000",
         "name": "Food",
-        "img": "",
-        "questions":  {
-            "hand": [
-                "Raise your hand if you’ve ever eaten something off the floor after dropping it.",
-                "Raise your hand if you enjoy pineapple on pizza.",
-                "Raise your hand if you've ever burned something while cooking.",
-                "Raise your hand if you can’t handle spicy food.",
-                "Raise your hand if you’ve ever ordered food just because it looked good on Instagram."
-            ],
-
-            "point":[
-                "Point to the person you think eats the healthiest in the group.",
-                "Point to the person who you think has the weirdest taste in food.",
-                "Point to the person who you think eats out the most.",
-                "Point to the person who you think is most likely to eat dessert first.",
-                "Point to the person who you think has never tried sushi."
-            ],
-
-            "fingers": [
-                "How many cups of coffee do you drink in a day?",
-                "How many different types of cereal do you think you currently have at home?",
-                "How many times have you had fast food this week?",
-                "How many ingredients do you think are in your favorite dish?",
-                "How many hours can you go without eating before getting “hangry”?"
-            ]
-        }
+        "questions": [
+            {
+                "img": "hand.png",
+                "type": [
+                    "Raise your hand if you’ve ever eaten something off the floor after dropping it.",
+                    "Raise your hand if you enjoy pineapple on pizza.",
+                    "Raise your hand if you've ever burned something while cooking.",
+                    "Raise your hand if you can’t handle spicy food.",
+                    "Raise your hand if you’ve ever ordered food just because it looked good on Instagram."
+                ]
+            },
+            {
+                "img": "point.png",
+                "type": [
+                    "Point to the person you think eats the healthiest in the group.",
+                    "Point to the person who you think has the weirdest taste in food.",
+                    "Point to the person who you think eats out the most.",
+                    "Point to the person who you think is most likely to eat dessert first.",
+                    "Point to the person you think has never tried sushi."
+                ]
+            },
+            {
+                "img": "fingers.png",
+                "type": [
+                    "How many cups of coffee do you drink in a day?",
+                    "How many different types of cereal do you think you currently have at home?",
+                    "How many times have you had fast food this week?",
+                    "How many ingredients do you think are in your favorite dish?",
+                    "How many hours can you go without eating before getting “hangry”?"
+                ]
+            }
+        ]
     },
-    {   
+    {
         "id": "74b75b16-f55f-4c89-a37a-4e356efbbf94",
         "name": "Travel",
-        "img": "",
-        "questions": {
-            "hand": [
-                "Raise your hand if you’ve ever traveled to another country.",
-                "Raise your hand if you prefer road trips over flights.",
-                "Raise your hand if you’ve ever missed a flight or train.",
-                "Raise your hand if you’ve stayed at a hostel before.",
-                "Raise your hand if you’ve taken a selfie in front of a famous landmark."
-            ],
-            "point": [
-                "Point to the person you think has traveled the most.",
-                "Point to the person you think prefers to stay at home over traveling.",
-                "Point to the person who you think would get lost without a GPS.",
-                "Point to the person who you think has the best travel stories.",
-                "Point to the person you think packs the most for a trip."
-            ],
-            "fingers": [
-                "How many countries have you visited?",
-                "How many hours is the longest trip you’ve ever taken?",
-                "How many travel apps do you have on your phone?",
-                "How many bags do you usually pack for a trip?",
-                "How many days would you spend on a dream vacation?"
-            ]
-        }
+        "questions": [
+            {
+                "img": "hand.png",
+                "type": [
+                    "Raise your hand if you’ve ever traveled to another country.",
+                    "Raise your hand if you prefer road trips over flights.",
+                    "Raise your hand if you’ve ever missed a flight or train.",
+                    "Raise your hand if you’ve stayed at a hostel before.",
+                    "Raise your hand if you’ve taken a selfie in front of a famous landmark."
+                ]
+            },
+            {
+                "img": "point.png",
+                "type": [
+                    "Point to the person you think has traveled the most.",
+                    "Point to the person you think prefers to stay at home over traveling.",
+                    "Point to the person who you think would get lost without a GPS.",
+                    "Point to the person who you think has the best travel stories.",
+                    "Point to the person you think packs the most for a trip."
+                ]
+            },
+            {
+                "img": "fingers.png",
+                "type": [
+                    "How many countries have you visited?",
+                    "How many hours is the longest trip you’ve ever taken?",
+                    "How many travel apps do you have on your phone?",
+                    "How many bags do you usually pack for a trip?",
+                    "How many days would you spend on a dream vacation?"
+                ]
+            }
+        ]
     },
     {
         "id": "d9c57b3f-8b1e-4781-b39d-665d02d7cdaa",
         "name": "Work",
-        "img": "",
-        "questions": {
-            "hand": [
-                "Raise your hand if you’ve ever called in sick when you weren’t.",
-                "Raise your hand if you’ve ever fallen asleep during a meeting.",
-                "Raise your hand if you’ve ever sent an email to the wrong person.",
-                "Raise your hand if you enjoy working overtime.",
-                "Raise your hand if you’ve ever worked on vacation."
-            ],
-            "point": [
-                "Point to the person you think is the most organized.",
-                "Point to the person who you think procrastinates the most.",
-                "Point to the person who you think drinks the most coffee at work.",
-                "Point to the person you think is most likely to be late for a meeting.",
-                "Point to the person who you think would be the best boss."
-            ],
-            "fingers": [
-                "How many jobs have you had so far?",
-                "How many hours do you usually work in a day?",
-                "How many meetings did you have last week?",
-                "How many coworkers’ names can you remember right now?",
-                "How many minutes do you spend on breaks each day?"
-            ]
-        }
+        "questions": [
+            {
+                "img": "hand.png",
+                "type": [
+                    "Raise your hand if you’ve ever called in sick when you weren’t.",
+                    "Raise your hand if you’ve ever fallen asleep during a meeting.",
+                    "Raise your hand if you’ve ever sent an email to the wrong person.",
+                    "Raise your hand if you enjoy working overtime.",
+                    "Raise your hand if you’ve ever worked on vacation."
+                ]
+            },
+            {
+                "img": "point.png",
+                "type": [
+                    "Point to the person you think is the most organized.",
+                    "Point to the person who you think procrastinates the most.",
+                    "Point to the person who you think drinks the most coffee at work.",
+                    "Point to the person you think is most likely to be late for a meeting.",
+                    "Point to the person who you think would be the best boss."
+                ]
+            },
+            {
+                "img": "fingers.png",
+                "type": [
+                    "How many jobs have you had so far?",
+                    "How many hours do you usually work in a day?",
+                    "How many meetings did you have last week?",
+                    "How many coworkers’ names can you remember right now?",
+                    "How many minutes do you spend on breaks each day?"
+                ]
+            }
+        ]
     },
     {
         "id": "c6f7a678-2c1e-4d5f-b243-f6c6b746f2db",
         "name": "Movies",
-        "img": "",
-        "questions": {
-            "hand": [
-                "Raise your hand if you’ve ever cried during a movie.",
-                "Raise your hand if you’ve ever watched the same movie more than five times.",
-                "Raise your hand if you prefer horror movies over comedies.",
-                "Raise your hand if you’ve ever walked out of a theater during a movie.",
-                "Raise your hand if you’ve ever fallen asleep during a movie."
-            ],
-            "point": [
-                "Point to the person you think has seen the most movies.",
-                "Point to the person who you think loves superhero movies the most.",
-                "Point to the person who you think hates spoilers the most.",
-                "Point to the person you think has the weirdest taste in movies.",
-                "Point to the person you think would survive the longest in a horror movie."
-            ],
-            "fingers": [
-                "How many movies have you watched this month?",
-                "How many hours do you spend watching movies each week?",
-                "How many movie genres can you name right now?",
-                "How many times have you gone to a movie theater this year?",
-                "How many movie quotes can you think of right now?"
-            ]
-        }
+        "questions": [
+            {
+                "img": "hand.png",
+                "type": [
+                    "Raise your hand if you’ve ever cried during a movie.",
+                    "Raise your hand if you’ve ever watched the same movie more than five times.",
+                    "Raise your hand if you prefer horror movies over comedies.",
+                    "Raise your hand if you’ve ever walked out of a theater during a movie.",
+                    "Raise your hand if you’ve ever fallen asleep during a movie."
+                ]
+            },
+            {
+                "img": "point.png",
+                "type": [
+                    "Point to the person you think has seen the most movies.",
+                    "Point to the person who you think loves superhero movies the most.",
+                    "Point to the person who you think hates spoilers the most.",
+                    "Point to the person you think has the weirdest taste in movies.",
+                    "Point to the person you think would survive the longest in a horror movie."
+                ]
+            },
+            {
+                "img": "fingers.png",
+                "type": [
+                    "How many movies have you watched this month?",
+                    "How many hours do you spend watching movies each week?",
+                    "How many movie genres can you name right now?",
+                    "How many times have you gone to a movie theater this year?",
+                    "How many movie quotes can you think of right now?"
+                ]
+            }
+        ]
     }
 ]

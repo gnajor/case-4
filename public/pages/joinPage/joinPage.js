@@ -11,16 +11,17 @@ export function renderJoinPage(parentId){
     parent.innerHTML = `<div id="join-page">
                             <div class="arrow-back-container"></div>
                             <div class="input-container">
-                                <div class="name-label">Room Code:</div>
+                                <div class="label">Room Code:</div>
                                 <input type="text">
                             </div>
-                            <div class="button-container">
-                                <button class="yellow-button">Join lobby</button>
+                            <div class="big-button-container">
+                                <button id="join-button">Join Lobby</button>
                             </div>
                         </div>`;
 
-    const joinLobbyButton = parent.querySelector(".yellow-button");
+    const joinLobbyButton = parent.querySelector("#join-button");
     const arrowBack = parent.querySelector(".arrow-back-container");
+    renderBackArrow(arrowBack, "home")
     
     joinLobbyButton.addEventListener("click", () => {
         const roomCodeInput = parent.querySelector("input").value;

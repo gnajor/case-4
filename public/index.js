@@ -1,9 +1,10 @@
 import { handleRoute, pageHandler, navigateTo} from "./pageHandler/pageHandler.js";
 import { PubSub } from "./utils/pubsub.js";
 
-const socket = new WebSocket("ws://localhost:8000/");
+const socket = new WebSocket(`ws://${window.location.hostname}:8000/`);
 
 //to be able to use reload and the arrows you need to store the page history in either localStorage or sessionStorage
+//right now I have a shared state: one in the server and one in the classes which is kinda stupid and has led to a lot of problems so I will fix : )
 
 window.addEventListener("popstate", () => { //popstate AKA using the website arrows 
     handleRoute(); 
@@ -22,7 +23,7 @@ window.addEventListener("load", () => {
 socket.addEventListener("message", (event) => {
     const serverToClientMessage = JSON.parse(event.data);
     
-    switch(serverToClientMessage){
+    switch(serverToClientMessage.event){
         case "user:recieved":{
             PubSub.publish({
                 event: "user:recieved",
@@ -40,23 +41,43 @@ socket.addEventListener("message", (event) => {
         }
 
         case "user:unreadied": {
-            console.log(serverToClientMessage.data);
+            PubSub.publish({
+                event: "user:unreadied",
+                details: serverToClientMessage.data
+            });
             break;
         }
 
         case "user:you-unreadied": {
-            console.log(serverToClientMessage.data);
+
             break
         }
 
+        case "user:left": {
+            console.log("fuck you")
+            navigateTo("entry");
+            break;
+        }
+
         case "user:readied": {
-            console.log(serverToClientMessage.data);
+            PubSub.publish({
+                event: "user:readied",
+                details: serverToClientMessage.data
+            });
             break;
         }
 
         case "user:you-readied": {
             console.log(serverToClientMessage.data); 
             break
+        }
+
+        case "user:voted": {
+            PubSub.publish({
+                event:"user:voted",
+                details: serverToClientMessage.data
+            });
+            break;
         }
 
         case "room:readied": {
@@ -98,12 +119,71 @@ socket.addEventListener("message", (event) => {
             });
             break;
         }
+
+        case "category:chosen": {
+            PubSub.publish({
+                event: "category:chosen",
+                details: serverToClientMessage.data.categoryId
+            });
+           break;
+        }
+
+        case "game:start-match":{
+            navigateTo("prompt", serverToClientMessage.data);
+            break;
+        }
+
+        case "game:show-prompt": {
+            PubSub.publish({
+                event: "game:show-prompt",
+                details: serverToClientMessage.data
+            });
+            break;
+        }
+
+        case "game:voting":{
+            navigateTo("voting", serverToClientMessage.data);
+            break;
+        }
+
+        case "game:everybody-voted": {
+            navigateTo("results", serverToClientMessage.data);
+            break;
+        }
+
+        case "game:leaderboard": {
+            navigateTo("leaderboard", serverToClientMessage.data);
+            break;
+        }
+
+        case "game:gone-to-menu": {
+            navigateTo("home", serverToClientMessage.data);
+            break;
+        }
+
+        case "game:gone-play-again": {
+            PubSub.publish({
+                event: "user:reset",
+                details: serverToClientMessage.data.users,
+            })
+            navigateTo("lobby", serverToClientMessage.data);
+            break;
+        }
     }
 });
 
 socket.addEventListener("close", () => {
     console.log("connection closed");
 });
+
+export function userLeave(data){
+    const message = {
+        action: "user:leave", //no duplication
+        data: data
+    }
+
+    socket.send(JSON.stringify(message));
+}
 
 function startGame(data){
     const message = {
@@ -174,6 +254,30 @@ export function addNewUserImage(user){
         data: user
     }
 
+    socket.send(JSON.stringify(message));
+}
+
+export function userVote(data){
+    const message = {
+        action: "game:user-vote",
+        data: data
+    }
+    socket.send(JSON.stringify(message));
+}
+
+export function goBackToMenu(data){
+    const message = {
+        action: "game:go-to-menu",
+        data: data
+    }
+    socket.send(JSON.stringify(message));
+}
+
+export function playAgain(data){
+    const message = {
+        action: "game:go-play-again",
+        data: data
+    }
     socket.send(JSON.stringify(message));
 }
 

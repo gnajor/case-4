@@ -1,6 +1,6 @@
 export interface ServerToClientMessage{
     event: string,
-    data: Record<string, string | OnlineUser[] | string[] | OnlineUser | WebSocket | boolean | number>
+    data: Record<string, string | OnlineUser[] | string[] | OnlineUser | WebSocket | boolean | number | Category>
 }
 
 export interface ClientToServerMessage{
@@ -21,8 +21,12 @@ export interface UserDb{
 export interface Category{
     id: string,
     name: string,
-    img: string
-    questions: string[] 
+    questions: Questions[]
+}
+
+export interface Questions{
+    img: string,
+    type: string[],
 }
 
 //ws protocols
@@ -32,39 +36,24 @@ export interface Room{
     password: string,
     matches: number,
     rounds: number,
-    category?: Category,
+    currentCategory?: Category,
+    currentQuestion?: string,
+    currentRound: number,
+    currentMatch: number
 }
 
 export interface OnlineUser{
     id: string,
     name: string,
     roomId?: string,
-    host?: boolean,
-    categoryChooser?: boolean
-    faker?: boolean
+    host: boolean,
+    categoryChooser: boolean
+    villain: boolean
+    playerVote?: string,
+    votes: number,
     ready: boolean,
     socket: WebSocket,
+    score: number
 }
 
-export interface timer{
-    duration: number,
-}
 
-export interface State{
-    users: OnlineUser[],
-    rooms: Room[],
-    timer: timer,
-    categories: Category[],
-    getUser(id: string): OnlineUser | undefined,
-    getUsers(id: string): OnlineUser[] | undefined,
-    getRandomUser(users: OnlineUser[]): OnlineUser,
-    getRoomByPwd(pwd: string): Room | undefined,
-    getRoomById(id: string | undefined): Room | undefined,
-    makeUserHost(user: OnlineUser, value: boolean): void,  
-    addUserToRoom(user: OnlineUser, roomPwd: string): void,
-    createRoom(room: Room): void,
-    createUser(user: OnlineUser): void,
-    editUserReadyStatus(user: OnlineUser, value: boolean): void,
-    checkAllUsersReady(users: OnlineUser[] | undefined) : boolean,
-    makeUserCategoryChooser(user:OnlineUser): void
-}

@@ -8,7 +8,9 @@ export function renderPreGamePage(parentId){
     }
 
     parent.innerHTML = `<div id="pre-game-page">
-                            <div class="page-title">Choose how long you want to play</div>
+                            <div class="page-title">
+                                <h1>Choose how long you want to play</h1>
+                            </div>
                             <div class="big-button-container">
                                 <button id="two-matches">2 MATCHES</button>
                                 <button id="four-matches">4 MATCHES</button>

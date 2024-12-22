@@ -12,23 +12,21 @@ export function renderLoginPage(parentId){
                             <div id="top">
                                 <div class="arrow-back-container"></div>
                                 <div class="page-title">
-                                    <h1 id="login-title">LOGIN</h1>
-                                </div>
-                            </div>
-                            <div id="bottom">
+                                    <h1 id="login-title">Welcome Back</h1>
+                                </div> 
                                 <div class="input-container">
                                     <div class="input-name-container">
-                                        <div class="name-label">USERNAME</div>
+                                        <div class="label">Username</div>
                                         <input type="text">
                                     </div>
                                     <div class="input-pwd-container">
-                                        <div class="pwd-label">PASSWORD </div>
+                                        <div class="label">Password</div>
                                         <input type="password">
                                     </div>
                                 </div>
-                                <div class="button-container">
-                                    <button class="yellow-button">LOGIN</button>
-                                </div>
+                            </div>
+                            <div class="button-container">
+                                <button class="yellow-button">LOGIN</button>
                             </div>
                         </div>`;
 

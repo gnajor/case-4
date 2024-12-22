@@ -9,11 +9,12 @@ export function renderEntryPage(parentId){
 
     parent.innerHTML = `<div id="entry-page" class="page">
                             <div id="game-title">
-                                <h1>WELCOME TO LYIN'N SPY'N</h1>
+                                <h1>Secret<h1>
+                                <h1>Villain</h1>
                             </div>
                             <div class="button-container">
-                                <button class="yellow-button">LOGIN</button>
-                                <button class="blue-button">REGISTER</button>
+                                <button class="yellow-button">Login</button>
+                                <button class="blue-button">Register</button>
                             </div>
                         </div>`
 

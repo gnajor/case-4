@@ -4,36 +4,53 @@ import { PubSub } from "../../utils/pubsub.js";
 
 export function renderLobbyPage(parentId, data){
     const parent = document.querySelector("#" + parentId);
+    console.log(data)
 
     if(!parent){
         return console.error("Parent Not Found");
     }
 
     parent.innerHTML = `<div id="lobby-page">
-                            <div class="page-title">
-                                <h1>Room Code: ${data.roomPwd}</h1>
+                            <div id="content-container">
+                                <div class="page-title">
+                                    <h1>Room Code: <span id="code"> ${data.roomPwd}</span></h1>
+                                </div>
+                                <div id="you-container">
+                                    <div id="arrow-left" class="arrow"><</div>
+                                    <div id="you"></div>
+                                    <div id="arrow-right" class="arrow">></div>
+                                </div>
+                                <div id="users-container"></div>
                             </div>
-                            <div id="you-container">
-                                <div id="arrow-left" class="arrow"><</div>
-                                <div id="you"></div>
-                                <div id="arrow-right" class="arrow">></div>
-                            </div>
-                            <div id="users-container"></div>
                             <div class="button-container">
                                 <button class="yellow-button" id="ready-button">Ready</button>
                             </div>
                         </div>`;
 
     const you = User.userInstances[0];
+    you.reset();
     you.render("you");
     you.renderYourProfileImgs();
+    you.renderProfileShape();
 
     if(data.users){
-        for(const user of data.users){
+        for(let i = 0; i < data.users.length; i++){
+            const user = data.users[i];
+            const userAlreadyExists = User.userInstances.find(userInstance => user.id === userInstance.id);
+
             if(user.id !== you.id){
-                const userInstance = new User(user.id, user.name);
-                userInstance.render("users-container");
-                userInstance.renderCurrentImg();
+                if(userAlreadyExists){
+                    userAlreadyExists.reset();
+                    userAlreadyExists.render("users-container");
+                    userAlreadyExists.renderProfileShape();
+                    userAlreadyExists.renderCurrentImg();
+                }
+                else{
+                    const userInstance = new User(user.id, user.name);
+                    userInstance.render("users-container");
+                    userInstance.renderProfileShape();
+                    userInstance.renderCurrentImg();
+                }
             }
         }
     }
@@ -104,6 +121,8 @@ export function renderLobbyPage(parentId, data){
         }, 200); 
     });
 
+    
+
     readyButton.addEventListener("click", (event) => {
         if(you.ready){
             event.target.classList.remove("ready");
@@ -125,16 +144,7 @@ PubSub.subscribe({
     listener: (user) => {
         const newUser = new User(user.id, user.name);
         newUser.render("users-container");
+        newUser.renderProfileShape();
         newUser.renderCurrentImg();
-    }
-});
-
-PubSub.subscribe({
-    event: "user:img-changed",
-    listener: (data) => {
-
-        const user = User.userInstances.find(user => user.id === data.id);
-        user.setImage(data.img);
-        user.renderCurrentImg();
     }
 });

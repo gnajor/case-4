@@ -1,6 +1,6 @@
 import { serveFileOrDir } from "./serveFileOrDir.ts";
 import { ClientToServerMessage } from "../protocols/protocols.ts";
-import { addUser, handleCreateRoom, handleJoinRoom , handleProfileChange, handleUserReady, handleUserUnready, handleCategoryChoose, handleStartGame, handleLobbyTimer} from "./wsHandlers.ts";
+import { addUser, handleCreateRoom, handleJoinRoom , handleProfileChange, handleUserReady, handleUserUnready, handleCategoryChosen, handleStartMatch, handleUserLeave, handleUserVote, handleGoToMenu, handlePlayAgain} from "./wsHandlers.ts";
 
 function handleWsRequests(request: Request) {
     const { socket, response } = Deno.upgradeWebSocket(request);
@@ -11,6 +11,7 @@ function handleWsRequests(request: Request) {
 
     socket.onmessage = (event) => {
         const clientMessage: ClientToServerMessage = JSON.parse(event.data);
+        console.log(clientMessage.action);
 
         switch(clientMessage.action){
             case "user:join":
@@ -29,6 +30,14 @@ function handleWsRequests(request: Request) {
                 handleUserUnready(socket, clientMessage.data);
                 break;
 
+            case "user:leave":
+                handleUserLeave(socket, clientMessage.data);
+                break;
+
+            case "game:user-vote":
+                handleUserVote(socket, clientMessage.data);
+                break;
+
             case "room:create":
                 handleCreateRoom(socket, clientMessage.data);
                 break;
@@ -38,15 +47,19 @@ function handleWsRequests(request: Request) {
                 break;
 
             case "start:game": 
-                handleStartGame(socket, clientMessage.data);
+                handleStartMatch(socket, clientMessage.data);
                 break;
 
             case "category:chosen":
-                handleCategoryChoose(socket, clientMessage.data);
+                handleCategoryChosen(socket, clientMessage.data);
                 break;
 
-            case "lobby-timer:start":
-                handleLobbyTimer(socket, clientMessage.data);
+            case "game:go-to-menu":
+                handleGoToMenu(socket, clientMessage.data);
+                break;
+
+            case "game:go-play-again":
+                handlePlayAgain(socket, clientMessage.data);
                 break;
         }
     };

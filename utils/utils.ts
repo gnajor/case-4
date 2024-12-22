@@ -1,6 +1,7 @@
 import { encodeHex } from "@std/encoding/hex";
 import { extname } from "@std/path/extname";
 
+
 export async function encrypt(str: string): Promise<string>{
     const strBuffer = new TextEncoder().encode(str); //turns string into a Uint8array AKA an array of bytes AKA ArrayBuffer
     const hashedBuffer = await crypto.subtle.digest("SHA-256", strBuffer); //hashed ArrayBuffer
@@ -18,11 +19,11 @@ export function generateId(): string{
     return crypto.randomUUID()
 }
 
-//min inclusive
-//max exclusive
+
 export function getRandomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min)) + min;
 }
+
 
 export function generateRoomPassword(length: number = 6): string{
     const id = generateRandString();
