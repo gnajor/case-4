@@ -1,8 +1,8 @@
 import { Category } from "../../entities/category.js";
-import { User } from "../../entities/user.js";
 import { pageHandler } from "../../pageHandler/pageHandler.js";
 import { renderTimer } from "../../components/timer.js";
 import { PubSub } from "../../utils/pubsub.js";
+import { userState } from "../../userState/userState.js";
 
 export function renderCategoryPage(parentId, data){
     const parent = document.querySelector("#" + parentId);
@@ -22,67 +22,62 @@ export function renderCategoryPage(parentId, data){
                         </div>`;
 
     const pageTitle = parent.querySelector(".page-title h1");
-    const categories = parent.querySelector("#categories");
+    const categoriesElement = parent.querySelector("#categories");
     const timerContainer = parent.querySelector(".timer-container");
     renderTimer(timerContainer, data.time);
-    const you = User.userInstances[0];
 
-    if(you.categoryChooser){
+    if(userState.getId() === data.id){
         pageTitle.textContent = "Categories";
 
-        for(const category of Category.categoryInstances){
-            category.render("categories");
-            category.addClickListener((event) => {
-                pageHandler.handleChosenCategory({
-                        id: category.id, 
-                });
+        for(const category of data.categories){
+            const categoryInstance = new Category(category.id, category.name, "categories");
+            categoryInstance.addClickListener(() => {
+                pageHandler.handleChosenCategory({id: category.id});
             });
         }
     }
 
     else{
-        const categoryChooser = User.userInstances.find(user => user.categoryChooser);
-        categories.classList.add("picking-category");
-        pageTitle.textContent = categoryChooser.name + " picks category...";
+        categoriesElement.classList.add("picking-category");
+        pageTitle.textContent = data.name + " picks category...";
+        const categoryInstances = [];
 
+        for(let i = 0; i < data.categories.length; i++){
+            const category = data.categories[i];
+            const categoryInstance = new Category(category.id, category.name, "categories");
+            categoryInstances.push(categoryInstance);
 
-        for(let i = 0; i < Category.categoryInstances.length; i++){
-            const category = Category.categoryInstances[i];
-            category.render("categories");
-
-            if(i === (Category.categoryInstances.length - 1)){
-                category.element.classList.add("active");
-            }
-            else{
-                category.element.classList.remove("active");
+            if(i === (data.categories.length - 1)){
+                categoryInstance.element.classList.add("active");
             }
         }
-
-        Category.renderCategoryAnimation();
+        Category.renderCategoryAnimation(categoryInstances);
     }
 }
 
 PubSub.subscribe({
     event: "category:chosen",
-    listener: (categoryId) => {
-        const categoryChooser = User.userInstances.find(user => user.categoryChooser);
-        const you = User.userInstances[0];
+    listener: (data) => {             
         const pageTitle = document.querySelector("#category-page h1");
-        const timerContainer = document.querySelector("#category-page .timer-container");
+        const categoriesElement = document.querySelector("#categories");
+        const categories = document.querySelectorAll(".category");
+
+        categoriesElement.classList.remove("picking-category")
         Category.stopAnimation();
+        
 
-        for(const category of Category.categoryInstances){
-            if(category.id === categoryId){
-                pageTitle.textContent = categoryChooser.name + " picked ";
-                timerContainer.remove();
+        categories.forEach(category => {
+            if(category.getAttribute("data-category-id") === data.categoryId){
+                pageTitle.textContent = data.userName + " picked ";
             }
+
             else{
-                category.delete();
+                category.remove();
             }
-        }
+        });
 
-        if(categoryChooser === you){
+        if(userState.getId() === data.userId){
             pageTitle.textContent = "You picked"
-        }
+        } 
     }
 });

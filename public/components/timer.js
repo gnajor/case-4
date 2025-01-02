@@ -13,4 +13,4 @@ PubSub.subscribe({
         const timer = document.querySelector("#timer");
         timer.textContent = timeLeft;
     }
-})
+});

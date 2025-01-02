@@ -1,15 +1,15 @@
 import { OnlineUser, Room, Category, ServerToClientMessage, Questions } from "../protocols/protocols.ts";
+import { User } from "../public/entities/user.js";
 import { generateId, generateRoomPassword, getImages, getRandomInt } from "../utils/utils.ts";
-
-
 
 export const state = {
     users: [] as OnlineUser[],
     rooms: [] as Room[],
+    profilePics: await getImages("./public/media/profiles"),
     categories: JSON.parse(await Deno.readTextFile("./db/categories.json")) as Category[],
-    timer: {  //needs to be changed //NOTE
-        duration: 20 as number, 
-        currentTimerId: 0 as number 
+    timer: { 
+        duration: 20 as number,
+        shortDuration: 5 as number, 
     },
 
     deleteUser(user: OnlineUser): void{
@@ -23,6 +23,10 @@ export const state = {
                 this.rooms.splice(i, 1);
             }
         }  
+    },
+
+    setTimerId(room: Room, id: number){
+        room.timerId = id;
     },
 
     resetUser(user: OnlineUser){
@@ -45,6 +49,9 @@ export const state = {
 
     resetMatchUsers(users: OnlineUser[]): void{
         for(const user of users){
+            user.votes = 0;
+            user.playerVote = undefined;
+
             if(user.categoryChooser){
                 user.categoryChooser = false;
             }
@@ -75,10 +82,6 @@ export const state = {
         room.currentRound = 0;
         room.currentCategory = undefined;
         room.currentQuestion = undefined;
-    },
-
-    setTimerId(timerId: number): void{
-        this.timer.currentTimerId = timerId;
     },
 
     editVillainStatus(user: OnlineUser, value:boolean): void{
@@ -131,6 +134,10 @@ export const state = {
 
     getRoomById(id: string): Room | undefined{
         return this.rooms.find((room) => room.id === id);
+    },
+
+    getCategoryChooser(users: OnlineUser[]){
+        return users.find((user) => user.categoryChooser === true)
     },
 
     makeUserHost(user: OnlineUser, value: boolean): void {
@@ -220,6 +227,10 @@ export const state = {
         room.currentMatch++;
     },
 
+    setNewUserImg(user: OnlineUser, img:string){
+        user.img = img;
+    },
+
     isNewMatch(room:Room): boolean{
         if(room.currentRound === room.rounds){
             return true;
@@ -253,7 +264,7 @@ function broadcastToRoom(socket: WebSocket | undefined, roomId: string, payload:
     }
 }
 
-export async function addUser(socket: WebSocket, user: Record<string, string>): Promise<void>{
+export function addUser(socket: WebSocket, user: Record<string, string>): void{
     const onlineUser: OnlineUser = {
         id: user.id,
         name: user.name,
@@ -264,23 +275,21 @@ export async function addUser(socket: WebSocket, user: Record<string, string>): 
         villain: false,
         categoryChooser: false,
         host: false,
+        img: user.img,
     }
 
     state.createUser(onlineUser);
-
-    const images = await getImages("./public/media/profiles"); //should probably be used by the api and not the server 
 
     send(socket, {
         event: "user:recieved",
         data: {
             id: user.id,
             name: user.name,
-            images: images
         }
     });
 }
 
-export function handleUserLeave(socket: WebSocket, data: Record<string, string>){
+export function handleUserLeave(socket: WebSocket, data: Record<string, string>): void{
     const user = state.getUser(data.userId);
     
     if(!user){
@@ -322,6 +331,7 @@ export function handleCreateRoom(socket: WebSocket, user: Record<string, string 
         event: "room:created",
         data: {
             roomPwd: password,
+            imgs: state.profilePics
         }
     });
 }
@@ -346,6 +356,7 @@ export function handleJoinRoom(socket: WebSocket, data:Record<string, string>): 
         event: "room:user-joined",
         data: {
             id: specificUser.id,
+            img: specificUser.img,
             name: specificUser.name,
         }
     });
@@ -362,21 +373,32 @@ export function handleJoinRoom(socket: WebSocket, data:Record<string, string>): 
         data: {
             users: users,
             roomPwd: specificRoom.password,
+            imgs: state.profilePics,
         }
     });
 }
 
 export function handleProfileChange(socket: WebSocket, data:Record<string, string>): void{
     const specificUser = state.getUser(data.id);
+
     
     if(!specificUser){
         return;
     }
 
+    state.setNewUserImg(specificUser, data.img);
+
     broadcastToRoom(undefined, specificUser.roomId as string,{
         event: "user:img-changed",
         data: {
             id: data.id,
+            img: data.img
+        }
+    });
+
+    send(socket, {
+        event: "user:you-img-changed",
+        data: {
             img: data.img
         }
     });
@@ -432,7 +454,6 @@ export function handleUserReady(socket: WebSocket, data:Record<string, string | 
     });
 
     const users = state.getUsers(specificUser.roomId as string);
-    console.log(users?.length);
 
     if(!users){
         return console.error("no users in room");
@@ -503,13 +524,20 @@ export function handleStartMatch(socket: WebSocket | undefined, data:Record<stri
         );
     }, 1000);
 
-    state.setTimerId(timerId);
+    const room = state.getRoomById(data.roomId);
+
+    if(!room){
+        return console.error("room does not exist");
+    }
+
+    state.setTimerId(room, timerId);
 
     broadcastToRoom(undefined, roomId as string, {
         event: "game:started",
         data: {
             "id": randomRoomUser.id,
-            "roomId": roomId,
+            "name": randomRoomUser.name,
+            "categories": state.categories,
             "time": state.timer.duration,
         }
     });
@@ -517,16 +545,18 @@ export function handleStartMatch(socket: WebSocket | undefined, data:Record<stri
 
 export function handleCategoryChosen(socket: WebSocket, data:Record<string, string>){
     const user = state.getUser(data.userId);
+    const event = "timer:ticking";
 
-    if(!user || !user.categoryChooser){
-        return;
+    if(!user){
+        return console.error("user does not exist");
     }
 
     const roomId = user.roomId;
 
     if(!roomId){
-        return;
+        return console.error("room does not exist");
     }
+
     const room = state.getRoomById(roomId);
     const category = state.getCategoryById(data.categoryId);
 
@@ -535,40 +565,53 @@ export function handleCategoryChosen(socket: WebSocket, data:Record<string, stri
     }
 
     state.addCategoryToRoom(room, category);
-    clearInterval(state.timer.currentTimerId);
+    clearInterval(room.timerId);
 
     broadcastToRoom(undefined, roomId as string, {
         event: "category:chosen",
         data: {
             categoryId: data.categoryId,
+            userId: user.id,
+            userName: user.name,
+            time: state.timer.shortDuration,
         }
     });
 
     const timerStartTime: number = Date.now();
-    const duration = 10;
 
     const timerId = setInterval(() => {
         timerHandler(
             timerStartTime,
             roomId,
             timerId,
-            duration,
-            undefined,
+            state.timer.shortDuration,
+            event,
             () => {
                 handleRounds(roomId)
             }
         );
     }, 1000);
 
-    state.setTimerId(timerId);
+    state.setTimerId(room, timerId)
 }
 
 function handleRandomCategory(roomId: string){
     const randCategory = state.getRandomCategory();
     const room = state.getRoomById(roomId);
+    const users = state.getUsers(roomId);
 
     if(!room){
-        return;
+        return console.error("room does not exist");
+    }
+
+    if(!users){
+        return console.error("users does not exist")
+    }
+
+    const specificUser = state.getCategoryChooser(users);
+
+    if(!specificUser){
+        return console.error("categorychooser does not exist");
     }
 
     state.addCategoryToRoom(room, randCategory);
@@ -576,27 +619,28 @@ function handleRandomCategory(roomId: string){
     broadcastToRoom(undefined, roomId, {
         event: "category:chosen",
         data: {
-            "categoryId": randCategory.id,
+            categoryId: randCategory.id,
+            userId: specificUser.id,
+            userName: specificUser.name,
+            time: state.timer.shortDuration,
         }
     });
 
     const timerStartTime: number = Date.now();
-    const duration = 10;
+    const event = "timer:ticking";
 
     const timerId = setInterval(() => {
         timerHandler(
             timerStartTime,
             roomId,
             timerId,
-            duration,
-            undefined,
+            state.timer.shortDuration,
+            event,
             () => {
                 handleRounds(roomId)
             }
         );
     }, 1000);
-
-    state.setTimerId(timerId);
 }
 
 function handleRounds(roomId: string){
@@ -621,6 +665,17 @@ function handleRounds(roomId: string){
     const timerStartTime: number = Date.now();
     const event = "timer:ticking";
 
+    broadcastToRoom(undefined, roomId, {
+        event: "game:start-match",
+        data: {
+            categoryName: category.name,
+            question: randQuestion,
+            time: state.timer.duration,
+            villain: villainId as string,
+            img: randType.img,
+        }
+    });
+
     const timerId = setInterval(() => {
         timerHandler(
             timerStartTime,
@@ -633,18 +688,6 @@ function handleRounds(roomId: string){
             }
         );
     }, 1000);
-
-    state.setTimerId(timerId);
-
-    broadcastToRoom(undefined, roomId, {
-        event: "game:start-match",
-        data: {
-            categoryId: category.id,
-            question: randQuestion,
-            villain: villainId as string,
-            img: randType.img,
-        }
-    });
 }
 
 function handleShowQuestion(roomId: string): void{
@@ -657,12 +700,12 @@ function handleShowQuestion(roomId: string): void{
     broadcastToRoom(undefined, roomId, {
         event: "game:show-prompt",
         data: {
+            time: state.timer.shortDuration,
             question: room.currentQuestion
         }
     });
 
     const timerStartTime: number = Date.now();
-    const duration = 5;
     const event = "timer:ticking";
 
     const timerId = setInterval(() => {
@@ -670,7 +713,7 @@ function handleShowQuestion(roomId: string): void{
             timerStartTime,
             roomId,
             timerId,
-            duration,
+            state.timer.shortDuration,
             event,
             () => {handleVoting(roomId)}
         );
@@ -683,6 +726,7 @@ function handleVoting(roomId: string): void{
     broadcastToRoom(undefined, roomId, {
         event: "game:voting",
         data: {
+            time: state.timer.duration,
             users: roomUsers
         }
     });
@@ -726,7 +770,7 @@ export function handleVotingTimeOut(roomId:string):void{
     const roomUsers = state.getUsers(roomId);
     const userVoted = state.checkAllVotes(roomUsers);
     const villain = state.getVillain(roomUsers);
-    const data: Record<string, string | boolean> = {};
+    const data: Record<string, string | boolean | number> = {};
     let nextAction = () => onRoundEnd(roomId);
 
     if(!villain){
@@ -754,8 +798,12 @@ export function handleVotingTimeOut(roomId:string):void{
 
     else if(userVoted !== villain){
         data.userId = userVoted.id;
+        data.userName = userVoted.name;
+        data.userImg = userVoted.img;
         state.addScoreToPlayers([villain], 150);
     }
+
+    data.time = state.timer.shortDuration;
 
     broadcastToRoom(undefined, roomId, {
         event: "game:everybody-voted",
@@ -763,15 +811,15 @@ export function handleVotingTimeOut(roomId:string):void{
     });
 
     const timerStartTime: number = Date.now();
-    const duration = 10;
+    const event = "timer:ticking";
 
     const timerId = setInterval(() => {
         timerHandler(
             timerStartTime,
             roomId,
             timerId,
-            duration,
-            undefined,
+            state.timer.shortDuration,
+            event,
             nextAction
         );
     }, 1000);
@@ -889,6 +937,7 @@ export function handlePlayAgain(socket: WebSocket, data:Record<string,string>){
         data: {
             "users": roomUsers,
             "roomPwd": room.password,
+            "imgs": state.profilePics,
         }
     });
 

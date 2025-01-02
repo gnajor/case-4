@@ -1,15 +1,12 @@
 import { PubSub } from "../utils/pubsub.js";
 
 export class Category{
-    static categoryInstances = [];
     static intervalId = 0;
 
-    static renderCategoryAnimation(){
+    static renderCategoryAnimation(categories){
         let counter = 0;
 
         Category.intervalId = setInterval(() => {
-            const categories = Category.categoryInstances;
-
             if(counter === 0){
                 categories[categories.length - 1].element.classList.remove("active");
             }
@@ -29,72 +26,46 @@ export class Category{
     }
 
     static stopAnimation(){
-        Category.categoryInstances.forEach(category => {
-            category.element.classList.add("active");
-        });
-
         clearInterval(Category.intervalId);
     }
 
-    constructor(category){
-        this.id = category.id;
-        this.name = category.name;
-        this.questions = category.questions;
-        this.img = category.img;
-        this.element = this.create();
-        this.chosenCategory = false,
-         
-        Category.categoryInstances.push(this);
+    constructor(id, name, parentId){
+        this.id = id;
+        this.name = name;
+        this.parentId = parentId;
+        this.element = this.render();
     }
 
-    create(){
-        const categoryElement = document.createElement("button");
-        categoryElement.id = this.name.toLowerCase();
-        categoryElement.className = "category";
-        categoryElement.textContent = this.name;
-
-        return categoryElement;
-    }
-
-    render(parentId){
-        const parent = document.querySelector("#" + parentId);
+    render(){
+        const parent = document.querySelector("#" + this.parentId);
         
         if(!parent){
             return console.error("Parent Not Found");
         }
-        this.parent = parent;
-        this.parent.appendChild(this.element);
+
+        const categoryElement = document.createElement("button");
+        categoryElement.id = this.name.toLowerCase();
+        categoryElement.className = "category";
+        categoryElement.textContent = this.name;
+        
+        if(this.id){
+            categoryElement.setAttribute("data-category-id", this.id);
+        }
+
+        parent.appendChild(categoryElement);
+        return categoryElement;
     }
 
     addClickListener(func){
         this.element.addEventListener("click", func, {once: true});
     }
-
-    delete(){
-        this.element.remove();
-    }
-
-    setchosenCategory(){
-        this.chosenCategory = true;
-    }
 }
 
-PubSub.subscribe({
+/* PubSub.subscribe({
     event: "setCategories",
     listener: (categories) => {
         for(const category of categories){
             const categoryInstance = new Category(category);
         }
     }
-});
-
-PubSub.subscribe({
-    event: "category:chosen",
-    listener: (categoryId) => {
-        const specificCategory = Category.categoryInstances.find(category => category.id === categoryId);
-
-        if(specificCategory){
-            specificCategory.setchosenCategory = true;
-        }
-    }
-})
+}); */

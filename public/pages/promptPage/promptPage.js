@@ -1,6 +1,7 @@
 import { renderTimer } from "../../components/timer.js";
 import { Category } from "../../entities/category.js";
 import { User } from "../../entities/user.js";
+import { userState } from "../../userState/userState.js";
 import { PubSub } from "../../utils/pubsub.js";
 
 export function renderPromptPage(parentId, data){
@@ -22,14 +23,11 @@ export function renderPromptPage(parentId, data){
                         </div>`;
     
     const timerContainer = parent.querySelector(".timer-container");
-    const specificCategory = Category.categoryInstances.find(category => category.id === data.categoryId);
 
     renderTimer(timerContainer, data.time);
-    specificCategory.render("categories");
+    const category = new Category(undefined, data.categoryName, "categories");
 
-    const you = User.userInstances[0];
-
-    if(data.villain === you.id){
+    if(data.villain === userState.getId()){
         const prompt = parent.querySelector("#prompt");
         prompt.textContent = "You are The Villain. Blend in and don't get caught";
     }

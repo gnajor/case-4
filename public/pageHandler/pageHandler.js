@@ -15,13 +15,13 @@ import { renderPromptPage } from "../pages/promptPage/promptPage.js";
 import { renderVotingPage } from "../pages/votingPage/votingPage.js";
 import { renderVotingResultPage } from "../pages/votingResultPage/votingResultPage.js";
 import { renderLeaderboardPage } from "../pages/leaderboardPage/leaderboardPage.js";
+import { userState } from "../userState/userState.js";
+import { User } from "../entities/user.js";
 
 const pageParent = "wrapper";
 
 export const pageHandler = {
-    currentUser: null,
-
-    async handleCategories(){
+/*     async handleCategories(){
         const resource = await apiCom("all", "category:all");
 
         if(resource){
@@ -30,7 +30,7 @@ export const pageHandler = {
                 details: resource
             });
         }
-    },
+    }, */
 
     async handleEntry(){
         const token = localStorage.getItem("token");
@@ -44,14 +44,14 @@ export const pageHandler = {
         const resource = await apiCom({token, name}, "token-name:authorization");
 
         if(resource){
-            this.currentUser = {
+            userState.initFromStorage({
                 id: resource.id,
                 name: resource.name,
-                token: resource.token
-            }
+                img: resource.img,
+            });
 
-            navigateTo("home", this.currentUser.name);
-            addUserToWs(this.currentUser);
+            navigateTo("home", resource.name);
+            addUserToWs(userState.currentUser);
 
         }
         else{
@@ -60,32 +60,31 @@ export const pageHandler = {
         }
     },
 
-    /* The top two methods should probably not be in this file as this not go from comonent => server but client => server */
+    /* The top two methods should probably not be in this file as this does not go from component => server but client => server */
 
     async handleLogin(user){
         const resource = await apiCom(user, "user:login");
 
         if(resource){
-            this.currentUser = {
+            userState.initFromStorage({
                 id: resource.id,
                 name: resource.name,
-                token: resource.token
-            }
+                img: resource.img,
+            });
 
-            localStorage.setItem("token", this.currentUser.token);
-            localStorage.setItem("name", this.currentUser.name);
-            navigateTo("home", this.currentUser.name);
-            addUserToWs(this.currentUser);
+            localStorage.setItem("token", resource.token);
+            localStorage.setItem("name", resource.name);
+            navigateTo("home", resource.name);
+            addUserToWs(userState.currentUser);
         }
     },
 
     handleLogout(){
         const data = {
-            "userId": this.currentUser.id
+            "userId": userState.getId()
         }
         
         localStorage.clear();
-
         userLeave(data);
     },
 
@@ -96,7 +95,7 @@ export const pageHandler = {
     handleJoinRoom(roomPwd){
         if(roomPwd){
             const data = {
-                "userId": this.currentUser.id,
+                "userId": userState.getId(),
                 "roomPwd": roomPwd
             };
 
@@ -118,7 +117,7 @@ export const pageHandler = {
 
     handleCreateRoom(setting){
         const user = {
-            "id": this.currentUser.id,
+            "id": userState.getId(),
             "matchAmount": setting,
             "host": true,
         }
@@ -128,7 +127,7 @@ export const pageHandler = {
 
     handleProfileChange(img){
         const user = {
-            "id": this.currentUser.id,
+            "id": userState.getId(),
             "img": img
         }
         addNewUserImage(user);
@@ -136,7 +135,7 @@ export const pageHandler = {
 
     handleUserReadyStatus(status){
         const user = {
-            "id": this.currentUser.id,
+            "id": userState.getId(),
             "ready": status
         }
 
@@ -150,7 +149,7 @@ export const pageHandler = {
 
     handleChosenCategory(category){
         const data = {
-            "userId": this.currentUser.id,
+            "userId": userState.getId(),
             "categoryId": category.id,
         }
         chosenCategory(data);
@@ -159,21 +158,21 @@ export const pageHandler = {
     handleVoting(userId){
         const data = {
             "voteId": userId,
-            "votedId": this.currentUser.id
+            "votedId": userState.getId(),
         }
         userVote(data);
     },
 
     handlePlayAgain(){
         const data = {
-            "userId": this.currentUser.id
+            "userId": userState.getId()
         }
         playAgain(data);
     },
 
     handleBackToMenu(){
         const data = {
-            "userId": this.currentUser.id
+            "userId": userState.getId()
         }
         goBackToMenu(data);
     }

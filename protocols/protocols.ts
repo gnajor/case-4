@@ -1,6 +1,6 @@
 export interface ServerToClientMessage{
     event: string,
-    data: Record<string, string | OnlineUser[] | string[] | OnlineUser | WebSocket | boolean | number | Category>
+    data: Record<string, string | OnlineUser[] | string[] | OnlineUser | WebSocket | boolean | number | Category | Category[]> //needs changing
 }
 
 export interface ClientToServerMessage{
@@ -40,6 +40,7 @@ export interface Room{
     currentQuestion?: string,
     currentRound: number,
     currentMatch: number
+    timerId?: number
 }
 
 export interface OnlineUser{
@@ -54,6 +55,7 @@ export interface OnlineUser{
     ready: boolean,
     socket: WebSocket,
     score: number
+    img: string;
 }
 
 

@@ -1,4 +1,6 @@
+import { renderTimer } from "../../components/timer.js";
 import { User } from "../../entities/user.js";
+import { userState } from "../../userState/userState.js";
 
 export function renderVotingResultPage(parentId, data){
     const parent = document.querySelector("#" + parentId);
@@ -8,6 +10,7 @@ export function renderVotingResultPage(parentId, data){
     }
 
     parent.innerHTML = `<div id="voting-result-page">
+                            <div class="timer-container"></div>
                             <div id="main">
                                 <img>
                                 <div id="page-subtitle">
@@ -18,10 +21,11 @@ export function renderVotingResultPage(parentId, data){
 
     const subTitle = parent.querySelector("#page-subtitle h2");
     const img = parent.querySelector("img");
-    const you = User.userInstances[0];
+    const timerContainer = parent.querySelector(".timer-container");
+    renderTimer(timerContainer, data.time);
 
     if(data.villainId){
-        if(you.id === data.villainId){
+        if(userState.getId() === data.villainId){
             subTitle.textContent = "You got caught";
             img.setAttribute("src", "../../media/icons/villain.png");
         }
@@ -31,23 +35,18 @@ export function renderVotingResultPage(parentId, data){
         }
     }
     else if(data.userId){
-        if(data.userId === you.id){
+        if(data.userId === userState.getId()){
             subTitle.textContent = "You are not the villain";
-            img.setAttribute("src","../../media/profiles/" + you.img);
+            img.setAttribute("src","../../media/profiles/" + data.userImg);
         }
         else{
-            const user = User.userInstances.find(user => data.userId === user.id);
-            subTitle.textContent = user.name + " is not the villain";
-            img.setAttribute("src", "../../media/profiles/" + user.img);
+            subTitle.textContent = data.userName + " is not the villain";
+            img.setAttribute("src", "../../media/profiles/" + data.userImg);
         }
     }
 
     else if(!data.villainId){
         subTitle.textContent = "The villain got away this time!";
         img.setAttribute("src", "../../media/icons/got-away.png");
-    }
-
-    for(const user of User.userInstances){
-        user.resetEachRound();
     }
 }

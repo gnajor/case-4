@@ -29,33 +29,34 @@ export function renderLeaderboardPage(parentId, data){
     const playAgainButton = parent.querySelector("#play-again");
     const backToMenu = parent.querySelector("#back-to-menu");
 
-    console.log(data.users)
-
     for(let i = 0; i < data.users.length; i++){
         const user = data.users[i];
-        const userInstance = User.userInstances.find(userInst => userInst.id === user.id);
-        userInstance.reset();
+        let parentId = "";
 
         switch(i){
-            case 0:
-                userInstance.render("first");   
+            case 0: {
+                parentId = "first";
                 break;
+            }
             
-            case 1: 
-                userInstance.render("second");
+            case 1: {
+                parentId = "second";
                 break;
+            }
 
-            case 2:
-                userInstance.render("third");
+            case 2: {
+                parentId = "third";
                 break;
+            }
 
-            default:
-                userInstance.render("other-users-container");
+            default:{
+                parentId = "other-users-container";
                 break;
-        }
+            }
+        }   
 
-        userInstance.renderCurrentImg();   
-        userInstance.renderScore(user.score);
+        const userInst = new User(user.id, user.name, user.img, parentId); 
+        userInst.renderScore(user.score);  
     }
 
     playAgainButton.addEventListener("click", () => {

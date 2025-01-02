@@ -15,20 +15,20 @@ window.addEventListener("load", () => {
 
     socket.addEventListener("open", () => {
         pageHandler.handleEntry();
-        pageHandler.handleCategories();
     });
 });
 
 
 socket.addEventListener("message", (event) => {
     const serverToClientMessage = JSON.parse(event.data);
+    console.log(serverToClientMessage.event);
     
     switch(serverToClientMessage.event){
         case "user:recieved":{
             PubSub.publish({
                 event: "user:recieved",
                 details: serverToClientMessage.data
-            })
+            });
             break;
         } 
 
@@ -36,6 +36,14 @@ socket.addEventListener("message", (event) => {
             PubSub.publish({
                 event: "user:img-changed",
                 details: serverToClientMessage.data
+            });
+            break;
+        }
+
+        case "user:you-img-changed": {
+            PubSub.publish({
+                event: "user:you-img-changed",
+                details: serverToClientMessage.data.img
             });
             break;
         }
@@ -49,12 +57,10 @@ socket.addEventListener("message", (event) => {
         }
 
         case "user:you-unreadied": {
-
             break
         }
 
         case "user:left": {
-            console.log("fuck you")
             navigateTo("entry");
             break;
         }
@@ -103,11 +109,7 @@ socket.addEventListener("message", (event) => {
             break;
         }
 
-        case "game:started": {   
-            PubSub.publish({
-                event: "category:chooser-chosen",
-                details: serverToClientMessage.data
-            })    
+        case "game:started": {    
             navigateTo("category", serverToClientMessage.data);
             break;
         }
@@ -123,8 +125,13 @@ socket.addEventListener("message", (event) => {
         case "category:chosen": {
             PubSub.publish({
                 event: "category:chosen",
-                details: serverToClientMessage.data.categoryId
+                details: serverToClientMessage.data
             });
+
+            PubSub.publish({
+                event: "timer:ticking",
+                details: serverToClientMessage.data.time
+            })
            break;
         }
 
@@ -137,6 +144,11 @@ socket.addEventListener("message", (event) => {
             PubSub.publish({
                 event: "game:show-prompt",
                 details: serverToClientMessage.data
+            });
+
+            PubSub.publish({
+                event: "timer:ticking",
+                details: serverToClientMessage.data.time
             });
             break;
         }
@@ -162,10 +174,7 @@ socket.addEventListener("message", (event) => {
         }
 
         case "game:gone-play-again": {
-            PubSub.publish({
-                event: "user:reset",
-                details: serverToClientMessage.data.users,
-            })
+            console.log(serverToClientMessage.data);
             navigateTo("lobby", serverToClientMessage.data);
             break;
         }
@@ -178,7 +187,7 @@ socket.addEventListener("close", () => {
 
 export function userLeave(data){
     const message = {
-        action: "user:leave", //no duplication
+        action: "user:leave",
         data: data
     }
 
@@ -187,7 +196,7 @@ export function userLeave(data){
 
 function startGame(data){
     const message = {
-        action: "start:game", //no duplication
+        action: "start:game", 
         data: data
     }
 
@@ -223,10 +232,7 @@ export function addUserToWs(user){
 
     const message = {
         action: "user:join",
-        data: {
-            id: user.id,
-            name: user.name,
-        }
+        data: user
     }
     socket.send(JSON.stringify(message));
 }

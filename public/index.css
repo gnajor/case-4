@@ -164,6 +164,7 @@ input:focus{
     font-family: "gowun-batang";
     text-align: center;
     font-size: 1.25rem;
+    height: fit-content;
 }
 
 .disappear{
@@ -528,6 +529,7 @@ input:focus{
     row-gap:4rem;
     column-gap: 4rem;
     margin-top:2rem;
+    padding:0 10%;
 }
 
 #lobby-page #you .profile-pic-container{
@@ -695,7 +697,7 @@ input:focus{
     margin-top:2rem;
 }
 
-#voting-page #title-n-users{
+#voting-page #title-and-users{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -820,7 +822,7 @@ input:focus{
     align-items: center;
 }
 
-#leaderboard-page .profile-pic{
+#leaderboard-page #top-three-container .profile-pic{
     width: 3rem;
     align-self: end;
     position: relative;
@@ -857,9 +859,32 @@ input:focus{
 #leaderboard-page #other-users-container .user{
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--white-color);
+    color: var(--black-color);
+    padding:0.5rem 3rem 0.5rem 2.5rem;
+    clip-path: polygon(0 0, 100% 0, 100% 80%, 0% 100%);
 }
 
+#leaderboard-page #other-users-container .user .profile{
+    display: flex;
+    flex-direction: row;
+    height: fit-content;
+    width: fit-content;
+}
+
+#leaderboard-page .name,
+#leaderboard-page .score{
+    padding: 0.5rem 0 0.9rem;
+}
+
+
 #wrapper:has(#leaderboard-page) .ready{
+    display: none;
+}
+
+#wrapper:has(#leaderboard-page) .votes-container{
     display: none;
 }
 

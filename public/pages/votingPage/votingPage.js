@@ -1,6 +1,7 @@
 import { renderTimer } from "../../components/timer.js";
 import { User } from "../../entities/user.js";
 import { pageHandler } from "../../pageHandler/pageHandler.js";
+import { userState } from "../../userState/userState.js";
 import { PubSub } from "../../utils/pubsub.js";
 
 export function renderVotingPage(parentId, data){
@@ -12,7 +13,7 @@ export function renderVotingPage(parentId, data){
 
     parent.innerHTML = `<div id="voting-page">
                             <div class="timer-container"></div>
-                            <div id="title-n-users">
+                            <div id="title-and-users">
                                 <div id="title">
                                     <div class="page-title">
                                         <h1>Vote now!</h1>
@@ -26,30 +27,24 @@ export function renderVotingPage(parentId, data){
                         </div>`;
 
     const timerContainer = parent.querySelector(".timer-container");
-    renderTimer(timerContainer);
-    const you = User.userInstances[0];
-
-    for(const user of User.userInstances){
-        user.render("users-container");
-        user.renderCurrentImg();
-        user.removeVote();
-        user.markUnready();
-
-        user.addClickListener((event) => {
-            if(user !== you){
-                pageHandler.handleVoting(user.id);
-            }
-        });
-    }
+    renderTimer(timerContainer, data.time);
+    User.renderUsersVotes(
+        data.users, 
+        userState.getId(), 
+        pageHandler.handleVoting, 
+        "users-container"
+    );
 }
 
 PubSub.subscribe({
     event: "user:voted",
     listener: (data) => {
-        for(const user of data.users){
-            const userInstance = User.userInstances.find(instance => instance.id === user.id);
-            userInstance.removeVote();
-            userInstance.renderVotes(user.votes);
-        }
+        document.querySelector("#users-container").innerHTML = "";
+        User.renderUsersVotes(
+            data.users, 
+            userState.getId(), 
+            pageHandler.handleVoting, 
+            "users-container"
+        );
     }
 });

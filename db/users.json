@@ -3,33 +3,35 @@
         "token": "96537b604bca99369b4b8d40c66bbafd11c84988184cd7f76838e682b80d6262",
         "id": "073f9308-5ae5-4d15-9a97-c69e925426b0",
         "name": "leo",
-        "password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
+        "password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+        "profilePic": "default.png"
     },
     {
         "token": "add08513849e51efc9ff00e04680f100e40b65d5f37d2ab66cd89de385c2ba05",
         "id": "73c5514f-0009-4825-96e1-d46fc612fe15",
         "name": "gnajor",
-        "password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
+        "password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+        "profilePic": "default.png"
     },
     {
         "token": "4d5be1f680493caeedde2ed10d389163f6867a21e9527bd0a45ebbd713447f67",
         "id": "78857321-2a10-45cb-9be7-8282deaa51ef",
         "name": "leobest",
         "password": "8535e86c8118bbbb0a18ac72d15d3a2b37b18d1bce1611fc60165f322cf57386",
-        "profilePic": ""
+        "profilePic": "default.png"
     },
     {
         "token": "6d970cd6185b4d73e3a3f2485be67011c0e60b713c298605175475f1a77e67eb",
         "id": "8ddd1c5b-df04-4d09-9e92-761652605af2",
         "name": "Stephen",
         "password": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
-        "profilePic": ""
+        "profilePic": "default.png"
     },
     {
         "token": "30331d2784d092b9afad4c6c62465bf7bdefce3ed250f1c85f3820571a3fd0a5",
         "id": "766646de-f988-44eb-a66c-15273ac1fe99",
         "name": "admin",
         "password": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
-        "profilePic": ""
+        "profilePic": "default.png"
     }
 ]

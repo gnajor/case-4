@@ -1,10 +1,10 @@
 import { pageHandler } from "../../pageHandler/pageHandler.js";
 import { User } from "../../entities/user.js";
 import { PubSub } from "../../utils/pubsub.js";
+import { userState } from "../../userState/userState.js";
 
 export function renderLobbyPage(parentId, data){
     const parent = document.querySelector("#" + parentId);
-    console.log(data)
 
     if(!parent){
         return console.error("Parent Not Found");
@@ -27,33 +27,16 @@ export function renderLobbyPage(parentId, data){
                             </div>
                         </div>`;
 
-    const you = User.userInstances[0];
-    you.reset();
-    you.render("you");
-    you.renderYourProfileImgs();
-    you.renderProfileShape();
-
+    const currentUser = userState.currentUser;
+    userState.setReady(false);
+    userState.render("you");
+    userState.renderProfileImgs("you", data.imgs);
+                    
     if(data.users){
-        for(let i = 0; i < data.users.length; i++){
-            const user = data.users[i];
-            const userAlreadyExists = User.userInstances.find(userInstance => user.id === userInstance.id);
-
-            if(user.id !== you.id){
-                if(userAlreadyExists){
-                    userAlreadyExists.reset();
-                    userAlreadyExists.render("users-container");
-                    userAlreadyExists.renderProfileShape();
-                    userAlreadyExists.renderCurrentImg();
-                }
-                else{
-                    const userInstance = new User(user.id, user.name);
-                    userInstance.render("users-container");
-                    userInstance.renderProfileShape();
-                    userInstance.renderCurrentImg();
-                }
-            }
-        }
+        User.renderUsers(data.users, "users-container", userState.getId());
     }
+
+    User.renderProfileShapes();
     
     const readyButton = parent.querySelector("#ready-button");
     const arrowLeft = parent.querySelector("#arrow-left");
@@ -75,14 +58,13 @@ export function renderLobbyPage(parentId, data){
                 if (i !== 0) {
                     next = i - 1;
                     profilePics[next].classList.add("active");
-                    pageHandler.handleProfileChange(User.profileImages[next])
+                    pageHandler.handleProfileChange(data.imgs[next])
                 } 
                 else{
                     next = profilePics.length - 1;
                     profilePics[next].classList.add("active");
-                    pageHandler.handleProfileChange(User.profileImages[next]);
+                    pageHandler.handleProfileChange(data.imgs[next]);
                 }
-    
                 break; 
             }
         }
@@ -105,12 +87,12 @@ export function renderLobbyPage(parentId, data){
                 if(i !== profilePics.length - 1){
                     next = i + 1;
                     profilePics[next].classList.add("active");  
-                    pageHandler.handleProfileChange(User.profileImages[next]);
+                    pageHandler.handleProfileChange(data.imgs[next]);
                 }
                 else{
                     next = 0;
                     profilePics[next].classList.add("active");
-                    pageHandler.handleProfileChange(User.profileImages[next]);
+                    pageHandler.handleProfileChange(data.imgs[next]);
                 }
                 break; 
             }
@@ -124,27 +106,25 @@ export function renderLobbyPage(parentId, data){
     
 
     readyButton.addEventListener("click", (event) => {
-        if(you.ready){
+        if(currentUser.ready){
             event.target.classList.remove("ready");
             event.target.textContent = "Ready";
-            you.setReady(false);
+            userState.setReady(false);
         }
         else{
             event.target.classList.add("ready");
             event.target.textContent = "Unready";
-            you.setReady(true);
+            userState.setReady(true);
         }
 
-        pageHandler.handleUserReadyStatus(you.ready);
+        pageHandler.handleUserReadyStatus(currentUser.ready);
     });
 }
 
 PubSub.subscribe({
     event: "room:user-joined",
     listener: (user) => {
-        const newUser = new User(user.id, user.name);
-        newUser.render("users-container");
-        newUser.renderProfileShape();
-        newUser.renderCurrentImg();
+        const newUser = new User(user.id, user.name, user.img, "users-container");
+        User.renderProfileShapes();
     }
 });

@@ -37,7 +37,6 @@ export function generateRoomPassword(length: number = 6): string{
     return password;
 }
 
-//should be in the api
 export async function getImages(directory: string): Promise<string[]> {
     const images = [];
 
