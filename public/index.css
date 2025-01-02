@@ -856,6 +856,10 @@ input:focus{
     background: var(--category-four);
 }
 
+#leaderboard-page #other-users-container{
+    padding-top: 3rem;
+}
+
 #leaderboard-page #other-users-container .user{
     display: flex;
     flex-direction: row;
@@ -874,8 +878,8 @@ input:focus{
     width: fit-content;
 }
 
-#leaderboard-page .name,
-#leaderboard-page .score{
+#leaderboard-page #other-users-container .name,
+#leaderboard-page #other-users-container .score{
     padding: 0.5rem 0 0.9rem;
 }
 
