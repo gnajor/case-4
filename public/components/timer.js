@@ -10,7 +10,16 @@ export function renderTimer(parent, time){
 PubSub.subscribe({
     event: "timer:ticking",
     listener: (timeLeft) => {
-        const timer = document.querySelector("#timer");
-        timer.textContent = timeLeft;
+        if(document.querySelector("#timer")){
+            const timer = document.querySelector("#timer");
+            timer.textContent = timeLeft;
+        }
+    }
+});
+
+PubSub.subscribe({
+    event: "game:action",
+    listener: (action) => {
+        document.querySelector(".timer-container #timer").textContent = action;
     }
 });

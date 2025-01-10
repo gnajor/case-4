@@ -1,5 +1,3 @@
-import { PubSub } from "../utils/pubsub.js";
-
 export class Category{
     static intervalId = 0;
 
@@ -60,12 +58,3 @@ export class Category{
         this.element.addEventListener("click", func, {once: true});
     }
 }
-
-/* PubSub.subscribe({
-    event: "setCategories",
-    listener: (categories) => {
-        for(const category of categories){
-            const categoryInstance = new Category(category);
-        }
-    }
-}); */

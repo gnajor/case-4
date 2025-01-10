@@ -1,6 +1,7 @@
 import { serveFileOrDir } from "./serveFileOrDir.ts";
 import { ClientToServerMessage } from "../protocols/protocols.ts";
-import { addUser, handleCreateRoom, handleJoinRoom , handleProfileChange, handleUserReady, handleUserUnready, handleCategoryChosen, handleStartMatch, handleUserLeave, handleUserVote, handleGoToMenu, handlePlayAgain} from "./wsHandlers.ts";
+import { addUser, handleCreateRoom, handleJoinRoom , handleProfileChange, handleUserReady, handleUserUnready, handleCategoryChosen, handleStartMatch, handleUserLeaveRoom, handleUserVote, handleGoToMenu, handlePlayAgain, handleUserLogout, handleUserLeaveByClosing} from "./wsHandlers.ts";
+import { wsDataGetter } from "./wsDataGetter.ts";
 
 function handleWsRequests(request: Request) {
     const { socket, response } = Deno.upgradeWebSocket(request);
@@ -11,7 +12,6 @@ function handleWsRequests(request: Request) {
 
     socket.onmessage = (event) => {
         const clientMessage: ClientToServerMessage = JSON.parse(event.data);
-        console.log(clientMessage.action);
 
         switch(clientMessage.action){
             case "user:join":
@@ -30,8 +30,8 @@ function handleWsRequests(request: Request) {
                 handleUserUnready(socket, clientMessage.data);
                 break;
 
-            case "user:leave":
-                handleUserLeave(socket, clientMessage.data);
+            case "user:logout":
+                handleUserLogout(socket, clientMessage.data);
                 break;
 
             case "game:user-vote":
@@ -56,16 +56,21 @@ function handleWsRequests(request: Request) {
 
             case "game:go-to-menu":
                 handleGoToMenu(socket, clientMessage.data);
+                handleUserLeaveRoom(socket, clientMessage.data);
                 break;
 
             case "game:go-play-again":
                 handlePlayAgain(socket, clientMessage.data);
                 break;
         }
+
+        if(clientMessage.action.includes("room:get")){
+            wsDataGetter(socket, clientMessage.action, clientMessage.data);
+        }
     };
 
     socket.onclose = () => {
-        console.log("Goodbye...");
+        handleUserLeaveByClosing(socket);
     };
 
     return response;

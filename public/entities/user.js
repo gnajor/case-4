@@ -13,10 +13,29 @@ export class User{
         }
     }
 
+    static getUserElementById(id){
+        const lobbyUser = document.querySelector(`#lobby-page [data-user-id="${id}"]`);
+        const votingUser = document.querySelector(`#voting-page [data-user-id="${id}"]`);
+
+        if(lobbyUser){
+            return lobbyUser;
+        }
+        else if(votingUser){
+            return votingUser;
+        }
+        else{
+            return undefined;
+        }
+    }
+
     static renderNewProfilePic(id, img){
         const path = "../../media/profiles/";
-        const user = document.querySelector(`[data-user-id="${id}"]`);
-        user.querySelector("img").setAttribute("src", path + img);
+        const user = User.getUserElementById(id);
+
+        if(user){
+            user.querySelector("img").setAttribute("src", path + img);
+        }
+
     }
 
     static renderUsers(users, parentId, userId = undefined){
@@ -30,7 +49,8 @@ export class User{
                 );
 
                 if(user.ready){
-                    userInst.setReady();
+                    User.setReady(userInst.element);
+                    
                 }
             }
         }
@@ -141,27 +161,37 @@ PubSub.subscribe({
 PubSub.subscribe({
     event: "user:readied",
     listener: (data) => {
-        const user = document.querySelector(`[data-user-id="${data.id}"]`);
-        User.setReady(user);
+        const user = User.getUserElementById(data.id);
+
+        if(user){
+            User.setReady(user);
+        }
     }
 });
 
 PubSub.subscribe({
     event: "user:unreadied",
     listener: (data) => {
-        const user = document.querySelector(`[data-user-id="${data.id}"]`);
-        User.setUnready(user);
+        const user = User.getUserElementById(data.id);
+
+        if(user){
+            User.setUnready(user);
+        }
     }
 });
 
-/* PubSub.subscribe({
-    event: "user:reset",
-    listener:(users) => {
-        for(const user of users){
-            const userInstance = User.userInstances.find(userInst => userInst.id === user.id);
-            userInstance.reset();
+PubSub.subscribe({
+    event: "user:left",
+    listener: (data) => {
+        console.log("cum")
+
+        const user = User.getUserElementById(data.id);
+
+        if(user){
+            user.remove();
         }
     }
-}); */
+})
+
 
 

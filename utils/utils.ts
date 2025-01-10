@@ -1,8 +1,9 @@
 import { encodeHex } from "@std/encoding/hex";
 import { extname } from "@std/path/extname";
+import { ServerToClientMessage } from "../protocols/protocols.ts";
 
 
-export async function encrypt(str: string): Promise<string>{
+export async function hash256(str: string): Promise<string>{
     const strBuffer = new TextEncoder().encode(str); //turns string into a Uint8array AKA an array of bytes AKA ArrayBuffer
     const hashedBuffer = await crypto.subtle.digest("SHA-256", strBuffer); //hashed ArrayBuffer
     return encodeHex(hashedBuffer); // converts the arrayBuffer to hexadecimal string
@@ -19,11 +20,10 @@ export function generateId(): string{
     return crypto.randomUUID()
 }
 
-
+//min inclusive, max exclusive
 export function getRandomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min)) + min;
 }
-
 
 export function generateRoomPassword(length: number = 6): string{
     const id = generateRandString();
@@ -52,4 +52,40 @@ export async function getImages(directory: string): Promise<string[]> {
     }
 
     return images;
+}
+
+export function send(socket:WebSocket, payload:ServerToClientMessage): void{
+    socket.send(JSON.stringify(payload));
+}
+
+export function encrypt(str: string){
+    const randInt = getRandomInt(2, 8);
+    let encryptedString: string = "";
+
+    for(let i = 0; i < str.length; i++){
+        const charCode = str.charCodeAt(i) + randInt;
+        const encryptedChar = String.fromCharCode(charCode);
+        encryptedString += encryptedChar;
+
+        if(i === (str.length - 2)){
+            encryptedString += String(randInt);
+        }
+    }
+    return encryptedString;
+}
+
+export function decrypt(str: string){
+    const key = Number(str[str.length - 2]);
+    let decryptedString: string = "";
+
+    for(let i = 0; i < str.length; i++){
+        if(i === (str.length - 2)){
+            continue;
+        }
+        
+        const charCode = str.charCodeAt(i) - key;
+        const decryptedChar = String.fromCharCode(charCode);
+        decryptedString += decryptedChar;
+    }   
+    return decryptedString;
 }

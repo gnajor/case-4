@@ -34,7 +34,7 @@ export const userState = {
         parent.appendChild(userElement);
     }, 
 
-    renderProfileImgs(parentId, profileImgs){
+    renderProfileImgs(parentId, profileImgs, newImg){
         const parent = document.querySelector("#" + parentId);
 
         if(!parent){
@@ -42,17 +42,22 @@ export const userState = {
         }
 
         const imgsContainer = parent.querySelector(".profile-pic-container");
+        let img = this.currentUser.img;
 
         if(!imgsContainer){
             return console.error("parent does not fit the criteria");
         }
 
+        if(newImg){
+            img = newImg;
+        }
+
         const path = "../media/profiles/";
-        const index = profileImgs.indexOf(this.currentUser.img);
+        const index = profileImgs.indexOf(img);
 
         if(index !== -1){
             profileImgs.splice(index, 1);
-            profileImgs.unshift(this.currentUser.img);
+            profileImgs.unshift(img);
         }
 
         for(const profileImg of profileImgs){

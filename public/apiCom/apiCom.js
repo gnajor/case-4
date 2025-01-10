@@ -1,15 +1,14 @@
-import { PubSub } from "../utils/pubsub.js";
+import { encrypt } from "../utils/utils.js";
 
 export async function apiCom(data, action){
     const options = {};
-    const response = undefined;
 
     switch(action){
         case "user:login": {
             options.method = "POST";
             options.body = {
-                name: data.name,
-                password: data.password
+                name: encrypt(data.name),
+                password: encrypt(data.password)
             }
             
             const resource = await fetcher("../../api/login", options);
@@ -19,8 +18,8 @@ export async function apiCom(data, action){
         case "user:register": {
             options.method = "POST";
             options.body = {
-                name: data.name,
-                password: data.password
+                name: encrypt(data.name),
+                password: encrypt(data.password)
             }
             
             const resource = await fetcher("../../api/register", options);
@@ -29,13 +28,17 @@ export async function apiCom(data, action){
 
         case "token-name:authorization": {
             options.method = "GET";
-            const resource = await fetcher(`../../api/user/?token=${data.token}&name=${data.name}`, options);
+            const resource = await fetcher(`../../api/user/?token=${encrypt(data.token)}&name=${encrypt(data.name)}`, options);
             return resource;
         }
 
-        case "category:all": {
-            options.method = "GET";
-            const resource = await fetcher(`../../api/category/?name=${data}`, options);
+        case "user:patch-new-image": {
+            options.method = "PATCH";
+            options.body = {
+                userId: encrypt(data.id),
+                imgSrc: encrypt(data.img),
+            }
+            const resource = await fetcher(`../../api/user`, options);
             return resource
         }
 
@@ -50,7 +53,7 @@ async function fetcher(url, options){
     try{
         const fetchOptions = {
             method: options.method,
-            headers: {"content-type": "applicationjson"},
+            headers: {"content-type": "application/json"},
         };
 
         if(fetchOptions.method !== "GET" && options.body){
@@ -60,11 +63,9 @@ async function fetcher(url, options){
         const response = await fetch(url, fetchOptions);
 
         if(!response.ok){
-            const message = await response.json();
+            const errorMessage = await response.text();
 
-            throw new Error(
-                message.error
-            );
+            throw new Error(`Error: ${errorMessage}`);
         };
 
         return await response.json();

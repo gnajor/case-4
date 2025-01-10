@@ -25,6 +25,7 @@ export function renderCategoryPage(parentId, data){
     const categoriesElement = parent.querySelector("#categories");
     const timerContainer = parent.querySelector(".timer-container");
     renderTimer(timerContainer, data.time);
+    userState.setReady(false);
 
     if(userState.getId() === data.id){
         pageTitle.textContent = "Categories";
@@ -64,7 +65,6 @@ PubSub.subscribe({
 
         categoriesElement.classList.remove("picking-category")
         Category.stopAnimation();
-        
 
         categories.forEach(category => {
             if(category.getAttribute("data-category-id") === data.categoryId){

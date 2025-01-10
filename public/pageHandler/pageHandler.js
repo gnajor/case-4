@@ -1,5 +1,5 @@
 import { apiCom } from "../apiCom/apiCom.js";
-import { addUserToWs, createRoom, joinRoom, addNewUserImage, makeUserReady, makeUserUnready, chosenCategory, userVote, goBackToMenu, playAgain, userLeave} from "../index.js";
+import { addUserToWs, createRoom, joinRoom, addNewUserImage, makeUserReady, makeUserUnready, chosenCategory, userVote, goBackToMenu, playAgain, userLogout, getRoomData, getRoomCategoryChooser, getRoomPromptData, getRoomVotingData, getRoomResultsData, getRoomLeaderboardData} from "../index.js";
 import { renderEntryPage } from "../pages/entryPage/entryPage.js";
 import { renderHomePage } from "../pages/homePage/homePage.js";
 import { renderLobbyPage } from "../pages/lobbyPage/lobbyPage.js";
@@ -8,68 +8,54 @@ import { renderRegisterPage } from "../pages/registerPage/registerPage.js";
 import { renderJoinPage } from "../pages/joinPage/joinPage.js";
 import { renderPreGamePage } from "../pages/preGamePage/preGamepage.js";
 import { renderCategoryPage } from "../pages/categoryPage/categoryPage.js";
-import * as category from "../entities/category.js";
 import * as categoryPage from "../pages/categoryPage/categoryPage.js";
-import { PubSub } from "../utils/pubsub.js";
 import { renderPromptPage } from "../pages/promptPage/promptPage.js";
 import { renderVotingPage } from "../pages/votingPage/votingPage.js";
 import { renderVotingResultPage } from "../pages/votingResultPage/votingResultPage.js";
 import { renderLeaderboardPage } from "../pages/leaderboardPage/leaderboardPage.js";
 import { userState } from "../userState/userState.js";
-import { User } from "../entities/user.js";
+import { decrypt, encrypt } from "../utils/utils.js";
 
 const pageParent = "wrapper";
 
 export const pageHandler = {
-/*     async handleCategories(){
-        const resource = await apiCom("all", "category:all");
-
-        if(resource){
-            PubSub.publish({
-                event: "setCategories",
-                details: resource
-            });
-        }
-    }, */
-
     async handleEntry(){
-        const token = localStorage.getItem("token");
-        const name = localStorage.getItem("name");
+        const encryptedToken = localStorage.getItem("token");
+        const encryptedName = localStorage.getItem("name");
     
-        if(!token && !name){
-            navigateTo("entry", pageParent);
+        if(!encryptedToken && !encryptedName){
+            handleRoute();
             return;
         }
+
+        const token = decrypt(encryptedToken);
+        const name = decrypt(encryptedName);
 
         const resource = await apiCom({token, name}, "token-name:authorization");
 
         if(resource){
             userState.initFromStorage({
-                id: resource.id,
-                name: resource.name,
-                img: resource.img,
+                id: decrypt(resource.id),
+                name: decrypt(resource.name),
+                img: decrypt(resource.img),
             });
 
-            navigateTo("home", resource.name);
             addUserToWs(userState.currentUser);
-
         }
         else{
             localStorage.clear();
-            navigateTo("entry");
+            handleRoute();
         }
     },
-
-    /* The top two methods should probably not be in this file as this does not go from component => server but client => server */
 
     async handleLogin(user){
         const resource = await apiCom(user, "user:login");
 
         if(resource){
             userState.initFromStorage({
-                id: resource.id,
-                name: resource.name,
-                img: resource.img,
+                id: decrypt(resource.id),
+                name: decrypt(resource.name),
+                img: decrypt(resource.img),
             });
 
             localStorage.setItem("token", resource.token);
@@ -85,7 +71,7 @@ export const pageHandler = {
         }
         
         localStorage.clear();
-        userLeave(data);
+        userLogout(data);
     },
 
     async handleRegister(user){
@@ -111,7 +97,7 @@ export const pageHandler = {
             this.handleCreateRoom(setting);
         }
         else{
-            navigateTo("roomsettings");
+            navigateTo("settings");
         }
     },
 
@@ -140,6 +126,11 @@ export const pageHandler = {
         }
 
         if(status){
+            apiCom({ //set user img to database, when game starts
+                id: userState.getId(), 
+                img: userState.currentUser.img,
+            }, "user:patch-new-image");
+
             makeUserReady(user);
         }
         else{
@@ -148,6 +139,7 @@ export const pageHandler = {
     },
 
     handleChosenCategory(category){
+
         const data = {
             "userId": userState.getId(),
             "categoryId": category.id,
@@ -203,24 +195,23 @@ export function navigateTo(page, data){
             break;
 
         case "home": 
-            renderHomePage(pageParent, data);
+            renderHomePage(pageParent);
             window.history.pushState({}, "", "/home");
             break;
 
-        case "roomsettings": 
+        case "settings": 
             renderPreGamePage(pageParent)
             window.history.pushState({}, "", "/room/settings");
             break;
 
         case "join": 
             renderJoinPage(pageParent);
-            window.history.pushState({}, "", "/join");
+            window.history.pushState({}, "", "/room");
             break;
-        
 
         case "lobby": 
             renderLobbyPage(pageParent, data);
-            window.history.pushState({}, "", "/room");
+            window.history.pushState({}, "", `/room`);
             break;
         
         case "category":
@@ -240,7 +231,7 @@ export function navigateTo(page, data){
 
         case "results":
             renderVotingResultPage(pageParent, data);
-            window.history.pushState({}, "", "/room/voting/results");
+            window.history.pushState({}, "", "/room/results");
             break;
 
         case "leaderboard":
@@ -249,32 +240,50 @@ export function navigateTo(page, data){
     }
 }
 
-export function handleRoute(){
+export function handleRoute(loggedIn = undefined, state = undefined){
     const path = window.location.pathname;
 
-    switch(path){
-        case "/home":
-            navigateTo("home", pageParent);
-            break;
+    if(!loggedIn && !state){
+        switch(path){
+            case "/register":
+                navigateTo("register");
+                break;
 
-        case "/login":
-            navigateTo("login", pageParent);
-            break;
+            case "/login":
+                navigateTo("login");
+                break;
 
-        case "/register":
-            navigateTo("register", pageParent);
-            break;
+            default: 
+                navigateTo("entry", pageParent);
+                break;
+        }
+    }
 
-        case "/room/settings":
-            navigateTo("home", pageParent);
-            break;
+    if(!state && loggedIn){
+        navigateTo("home");
+    }
 
-        case "/room":
-            navigateTo("room", pageParent);
-            break;
-
-        default: 
+    if(state){
+        if(state.includes("lobby")){
+            getRoomData(userState.getId());
+        }
+        else if(state.includes("category")){
+            getRoomCategoryChooser(userState.getId());
+        }
+        else if(state.includes("prompt")){
+            getRoomPromptData(userState.getId());
+        }
+        else if(state.includes("voting")){
+            getRoomVotingData(userState.getId());   
+        }
+        else if(state.includes("results")){
+            getRoomResultsData(userState.getId());
+        }
+        else if(state.includes("leaderboard")){
+            getRoomLeaderboardData(userState.getId());
+        }
+        else{
             navigateTo("entry", pageParent);
-            break;
+        }
     }
 }

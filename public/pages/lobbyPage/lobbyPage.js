@@ -2,6 +2,7 @@ import { pageHandler } from "../../pageHandler/pageHandler.js";
 import { User } from "../../entities/user.js";
 import { PubSub } from "../../utils/pubsub.js";
 import { userState } from "../../userState/userState.js";
+import { renderBackArrow } from "../../components/backArrow.js";
 
 export function renderLobbyPage(parentId, data){
     const parent = document.querySelector("#" + parentId);
@@ -11,6 +12,7 @@ export function renderLobbyPage(parentId, data){
     }
 
     parent.innerHTML = `<div id="lobby-page">
+                            <div class="arrow-back-container"></div>
                             <div id="content-container">
                                 <div class="page-title">
                                     <h1>Room Code: <span id="code"> ${data.roomPwd}</span></h1>
@@ -27,21 +29,22 @@ export function renderLobbyPage(parentId, data){
                             </div>
                         </div>`;
 
-    const currentUser = userState.currentUser;
-    userState.setReady(false);
+    let currentUserImg = "";
     userState.render("you");
-    userState.renderProfileImgs("you", data.imgs);
-                    
+    
     if(data.users){
         User.renderUsers(data.users, "users-container", userState.getId());
+        currentUserImg = data.users.find(user => user.id === userState.getId()).img;
     }
 
+    userState.renderProfileImgs("you", data.imgs, currentUserImg);
     User.renderProfileShapes();
     
     const readyButton = parent.querySelector("#ready-button");
     const arrowLeft = parent.querySelector("#arrow-left");
     const arrowRight = parent.querySelector("#arrow-right");
     const profilePics = parent.querySelectorAll("#you .profile-pic");
+    const arrowBack = parent.querySelector(".arrow-back-container");
 
     profilePics[0].classList.add("active");
     let isTransitioning = false; 
@@ -50,7 +53,7 @@ export function renderLobbyPage(parentId, data){
         if (isTransitioning) return; 
         isTransitioning = true;
     
-        for (let i = 0; i < profilePics.length; i++) {
+        for(let i = 0; i < profilePics.length; i++) {
             if (profilePics[i].classList.contains("active")) {
                 profilePics[i].classList.remove("active");
                 let next = 0;
@@ -102,11 +105,9 @@ export function renderLobbyPage(parentId, data){
             isTransitioning = false;
         }, 200); 
     });
-
     
-
     readyButton.addEventListener("click", (event) => {
-        if(currentUser.ready){
+        if(userState.currentUser.ready){
             event.target.classList.remove("ready");
             event.target.textContent = "Ready";
             userState.setReady(false);
@@ -117,8 +118,17 @@ export function renderLobbyPage(parentId, data){
             userState.setReady(true);
         }
 
-        pageHandler.handleUserReadyStatus(currentUser.ready);
+        pageHandler.handleUserReadyStatus(userState.currentUser.ready);
     });
+
+    renderBackArrow(arrowBack, "home", () => {
+        pageHandler.handleBackToMenu()
+    });
+
+    if(userState.currentUser.ready){
+        readyButton.classList.add("ready");
+        readyButton.textContent = "Unready";
+    }
 }
 
 PubSub.subscribe({
@@ -127,4 +137,11 @@ PubSub.subscribe({
         const newUser = new User(user.id, user.name, user.img, "users-container");
         User.renderProfileShapes();
     }
+});
+
+PubSub.subscribe({
+    event: "user:you-readied",
+    listener: (ready) => {
+        userState.setReady(ready);
+    } 
 });

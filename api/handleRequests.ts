@@ -1,19 +1,14 @@
 import { UserDb } from "../protocols/protocols.ts";
-import { getImages } from "../utils/utils.ts";
-import { encrypt, generateRandString } from "../utils/utils.ts";
+import { hash256, generateRandString, generateId, decrypt, encrypt } from "../utils/utils.ts";
 
 let users: UserDb[] = [];
 
 try{
     const usersDbString = await Deno.readTextFile("./db/users.json");
-/*     const categoriesDbString = await Deno.readTextFile("./db/categories.json"); */
 
     if(usersDbString.length > 0){
         users = JSON.parse(usersDbString);
     }
-/*     if(categoriesDbString.length > 0){
-        categories = JSON.parse(categoriesDbString);
-    } */
 } 
 catch(error){
     if(error instanceof Deno.errors.NotFound) {
@@ -29,68 +24,63 @@ export async function handleRequests(request: Request): Promise<Response>{
 
     if(url.pathname === "/api/register" && request.method === "POST"){
         const {name, password} = await request.json();
+        const decryptedName = decrypt(name);
+        const decryptedPwd = decrypt(password);
 
         for(const user of users){
-            if(user.name === name){
+            if(user.name === decryptedName){
                 return new Response(JSON.stringify({error: "Username is already in use"}), {status: 400});
             }
         }
 
-        const encryptedPassword = await encrypt(password);
-        const encryptedToken = await encrypt(generateRandString());
-        const id = crypto.randomUUID();
+        const hashedPassword = await hash256(decryptedPwd);
+        const hashedToken = await hash256(generateRandString());
+        const id = generateId();
 
         const user: UserDb = {
-            token: encryptedToken,
+            token: hashedToken,
             id: id,
             name: name,
-            password: encryptedPassword,
+            password: hashedPassword,
             profilePic: "default.png"
         }
 
         users.push(user);
         await Deno.writeTextFile("./db/users.json", JSON.stringify(users, null, 4));
 
-        return new Response(JSON.stringify({message: name + " was added"}), {status: 201});
+        return new Response(JSON.stringify({message: name + "was added"}), {status: 201});
     }
 
     if(url.pathname === "/api/login" && request.method === "POST"){
         const {name, password} = await request.json();
-        const encryptedPassword = await encrypt(password);
+        const decryptedName = decrypt(name);
+        const decryptedPwd = decrypt(password);
+
+        const hashedPassword = await hash256(decryptedPwd);
 
         for(const user of users){
-            if(user.name === name && user.password === encryptedPassword){
+            if(user.name === decryptedName && user.password === hashedPassword){
                 return new Response(JSON.stringify({
-                    id: user.id, 
-                    name: name, 
-                    token: user.token,
-                    img: user.profilePic,
+                    id: encrypt(user.id), 
+                    name: encrypt(user.name), 
+                    token: encrypt(user.token),
+                    img: encrypt(user.profilePic),
                 }), {status: 200});
             }
         }
         return new Response(JSON.stringify({error: "User Not Found"}), {status: 404});
     }
-
-    
-    if(url.pathname === "/api/user" && request.method === "PATCH"){
-        const updatedUser = await request.json();
-        
-        for(let i = 0; i < users.length; i++){
-            if(users[i].id === updatedUser.id){
-                users[i].profilePic = updatedUser.profilePic;
-            }
-        }
-    }
     
     if(url.pathname.startsWith("/api/user") && request.method === "GET"){
         const urlToken = url.searchParams.get("token");
         const urlName = url.searchParams.get("name");
-        
-        if(urlToken?.length !== 64){
+
+        if(!urlToken){
             return new Response(JSON.stringify({error: "Token not approved"}), {status: 401});
         }
-        
-        const user = users.find((user) => user.token === urlToken);
+
+        const token = decrypt(urlToken);        
+        const user = users.find((user) => user.token === token);
         
         if(!user){
             return new Response(JSON.stringify({error: "No user with that token exists"}), {status: 401});
@@ -99,52 +89,35 @@ export async function handleRequests(request: Request): Promise<Response>{
         if(!urlName || urlName === ""){
             return new Response(JSON.stringify({error: "Username not approved"}), {status: 401});
         }
-        
-        if(urlName !== user.name){
+
+        const userName = decrypt(urlName);
+        if(userName !== user.name){
             return new Response(JSON.stringify({error: "username does not exist"}), {status: 401});
         }
         
         return new Response(JSON.stringify({
-            id: user.id, 
-            name: user.name,
-            img: user.profilePic, 
-            token: user.token
+            id: encrypt(user.id),
+            name: encrypt(user.name),
+            img: encrypt(user.profilePic), 
+            token: encrypt(user.token)
         }), {status: 202});
     }
-
-    /*     if(url.pathname === "/api/categories" && request.method === "GET"){
-            const categoryName = await request.json();
     
-            for(const category of categories){
-                if(categoryName === category.name){
-                    return new Response(JSON.stringify({questions: category.questions}), {status: 200});
-                }
-            }
-      
-            return new Response(JSON.stringify({error: "Category Not Found"}), {status: 404});
-        } */
-    
-/*     if(url.pathname === "/api/user" && request.method === "PATCH"){
+    if(url.pathname === "/api/user" && request.method === "PATCH"){
         const {userId, imgSrc} = await request.json();
+        const decryptedUserId = decrypt(userId);
+        const decryptedImgSrc = decrypt(imgSrc);
 
         for(const user of users){
-            if(user.id === userId){
-                user.profilePic = imgSrc;
+            if(user.id === decryptedUserId){
+                user.profilePic = decryptedImgSrc;
             }
         }
         await Deno.writeTextFile("./db/users.json", JSON.stringify(users, null, 4));
-    } */
+        return new Response(JSON.stringify({"ok": "profile image was added"}), {status: 200});
+    }
 
-/*     if(url.pathname.startsWith("/api/category") && request.method === "GET"){
-        const urlCategory = url.searchParams.get("name");
 
-        if(urlCategory === "all"){
-            return new Response(JSON.stringify(categories));
-        }
-        else{
-            return new Response(JSON.stringify({error: "Category not found"}), {status: 404});
-        }
-    } */
     
     return new Response("Path Not Found",{status: 404});
 }

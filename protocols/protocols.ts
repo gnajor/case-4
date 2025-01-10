@@ -37,10 +37,13 @@ export interface Room{
     matches: number,
     rounds: number,
     currentCategory?: Category,
+    currentImg?: string,
     currentQuestion?: string,
     currentRound: number,
-    currentMatch: number
-    timerId?: number
+    currentMatch: number,
+    timerId?: number,
+    currentTime: number,
+    currentState: string
 }
 
 export interface OnlineUser{
@@ -48,7 +51,7 @@ export interface OnlineUser{
     name: string,
     roomId?: string,
     host: boolean,
-    categoryChooser: boolean
+    categoryChooser: boolean,
     villain: boolean
     playerVote?: string,
     votes: number,
@@ -56,6 +59,7 @@ export interface OnlineUser{
     socket: WebSocket,
     score: number
     img: string;
+    leaveTimerId: number
 }
 
 

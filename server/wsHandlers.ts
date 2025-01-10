@@ -1,264 +1,16 @@
-import { OnlineUser, Room, Category, ServerToClientMessage, Questions } from "../protocols/protocols.ts";
-import { User } from "../public/entities/user.js";
-import { generateId, generateRoomPassword, getImages, getRandomInt } from "../utils/utils.ts";
-
-export const state = {
-    users: [] as OnlineUser[],
-    rooms: [] as Room[],
-    profilePics: await getImages("./public/media/profiles"),
-    categories: JSON.parse(await Deno.readTextFile("./db/categories.json")) as Category[],
-    timer: { 
-        duration: 20 as number,
-        shortDuration: 5 as number, 
-    },
-
-    deleteUser(user: OnlineUser): void{
-        const index = this.users.indexOf(user);
-        this.users.splice(index, 1);
-    },
-
-    deleteRoomById(roomId:string){
-        for(let i = 0; i < this.rooms.length; i++){
-            if(this.rooms[i].id === roomId){
-                this.rooms.splice(i, 1);
-            }
-        }  
-    },
-
-    setTimerId(room: Room, id: number){
-        room.timerId = id;
-    },
-
-    resetUser(user: OnlineUser){
-        user.categoryChooser = false;
-        user.host = false;
-        user.playerVote = undefined;
-        user.ready = false;
-        user.roomId = undefined;
-        user.votes = 0;
-        user.villain = false;
-        user.score = 0
-    },
-
-    resetRoundUsers(users: OnlineUser[]): void{
-        for(const user of users){
-            user.votes = 0;
-            user.playerVote = undefined;
-        }
-    },
-
-    resetMatchUsers(users: OnlineUser[]): void{
-        for(const user of users){
-            user.votes = 0;
-            user.playerVote = undefined;
-
-            if(user.categoryChooser){
-                user.categoryChooser = false;
-            }
-
-            if(user.villain){
-                user.villain = false;
-            }
-        }
-    },
-
-    resetRoomUsers(users: OnlineUser[]): void{
-        for(const user of users){
-            user.categoryChooser = false;
-            user.playerVote = undefined;
-            user.ready = false;
-            user.votes = 0;
-            user.villain = false;
-            user.score = 0;
-        }
-    },
-
-    resetRounds(room:Room){
-        room.currentRound = 0;
-    },
-
-    resetRoom(room: Room){
-        room.currentMatch = 0;
-        room.currentRound = 0;
-        room.currentCategory = undefined;
-        room.currentQuestion = undefined;
-    },
-
-    editVillainStatus(user: OnlineUser, value:boolean): void{
-        user.villain = value;
-    },
-
-    editPlayerVote(user: OnlineUser, userId: string): void{
-        user.playerVote = userId;
-    },
-
-    getUser(userId: string): OnlineUser | undefined {
-        return this.users.find((user) => user.id === userId);
-    },
-
-    getRandomUser(users: OnlineUser[]): OnlineUser {
-        const randomIndex = getRandomInt(0, users.length);
-        return users[randomIndex];
-    },
-
-    getRandomCategory(){
-        const randomIndex = getRandomInt(0, this.categories.length);
-        return this.categories[randomIndex];
-    },
-
-    setQuestionToRoom(room: Room, question: string){
-        room.currentQuestion = question;
-    },
-
-    getRandomTypeInCategory(category: Category): Questions{
-        const randomIndex = getRandomInt(0, category.questions.length);
-        return category.questions[randomIndex];
-    },
-
-    getRandomQuestionInCategory(questions: Questions): string{
-        const randomIndex = getRandomInt(0, questions.type.length);
-        return questions.type[randomIndex]; //need to use in the other functions
-    },
-
-    getCategoryById(categoryId: string): Category | undefined{
-        return state.categories.find(category => category.id === categoryId);
-    },
-
-    getUsers(roomId: string): OnlineUser[] {
-        return this.users.filter((user) => user.roomId === roomId);
-    },
-
-    getRoomByPwd(pwd: string): Room | undefined {
-        return this.rooms.find((room) => room.password === pwd);
-    },
-
-    getRoomById(id: string): Room | undefined{
-        return this.rooms.find((room) => room.id === id);
-    },
-
-    getCategoryChooser(users: OnlineUser[]){
-        return users.find((user) => user.categoryChooser === true)
-    },
-
-    makeUserHost(user: OnlineUser, value: boolean): void {
-        user.host = value;
-    },
-
-    addUserToRoom(user: OnlineUser, roomId: string): void {
-        user.roomId = roomId;
-    },
-
-    addCategoryToRoom(room: Room, category: Category){
-        room.currentCategory = category
-    },
-
-    addCategoryQuestion(room: Room, question: string){
-        room.currentQuestion = question;
-    },
-
-    createRoom(room: Room): void {
-        this.rooms.push(room);
-    },
-
-    createUser(user: OnlineUser): void {
-        const existingUser = this.users.find((u) => u.id === user.id);
-        if (!existingUser) {
-            this.users.push(user);
-        } else {
-            existingUser.socket = user.socket;
-        }
-    },
-
-    editUserReadyStatus(user: OnlineUser, value: boolean): void {
-        user.ready = value;
-    },
-
-    checkAllUsersReady(users: OnlineUser[]): boolean {
-        return users.every((user) => user.ready);
-    },
-
-    makeUserCategoryChooser(user: OnlineUser): void {
-        user.categoryChooser = true;
-    },
-
-    setUsersVotes(users: OnlineUser[]):void{
-        for(const user of users){
-            const userVotes = users.filter(filterUser => filterUser.playerVote === user.id);
-            user.votes = userVotes.length;
-        }
-    },
-
-    getVillain(users: OnlineUser[]): OnlineUser | undefined{
-        return users.find(user => user.villain === true);
-    },
-    
-    checkAllVotes(users: OnlineUser[]): OnlineUser | undefined{
-        for(const user of users){
-            if(user.votes === (users.length - 1)){
-                return user;
-            }
-        }
-        return;
-    },
-
-    getAllNotVillain(users: OnlineUser[]): OnlineUser[]{
-        return users.filter(user => user.villain === false);
-    },
-
-    addScoreToPlayers(users: OnlineUser[], amount: number): void{
-        users.forEach(user => {
-            user.score += amount;
-        });
-    },
-
-    getUsersAscendingScore(users: OnlineUser[]): OnlineUser[]{
-        return users.sort((a,b) => b.score - a.score);
-    },
-
-    getUsersWhoVotedRight(users: OnlineUser[], villain: OnlineUser){
-        return users.filter(user => user.playerVote === villain.id);
-    },
-
-    setNewRoomRound(room: Room): void{
-        room.currentRound++;
-    },
-
-    setNewMatch(room: Room):void{
-        room.currentMatch++;
-    },
-
-    setNewUserImg(user: OnlineUser, img:string){
-        user.img = img;
-    },
-
-    isNewMatch(room:Room): boolean{
-        if(room.currentRound === room.rounds){
-            return true;
-        }
-        return false;
-    },
-
-    isGameOver(room:Room): boolean{
-        if(room.currentMatch === room.matches){
-            return true;
-        }
-        return false;
-    }
-}
+import { OnlineUser, Room, ServerToClientMessage} from "../protocols/protocols.ts";
+import {generateId, generateRoomPassword, send } from "../utils/utils.ts";
+import { state } from "./wsState.ts";
 
 function broadcastToRoom(socket: WebSocket | undefined, roomId: string, payload:ServerToClientMessage): void{
     const roomUsers = state.getUsers(roomId as string);
 
     if(!roomUsers){
-        return;
+        return console.error("users does not exist");
     }
 
     for(const user of roomUsers){
         if(user.socket !== socket){
-            if(payload.event === "game:start"){
-                console.log(user);
-            }
-
             send(user.socket, payload);
         }
     }
@@ -276,32 +28,102 @@ export function addUser(socket: WebSocket, user: Record<string, string>): void{
         categoryChooser: false,
         host: false,
         img: user.img,
+        leaveTimerId: 0,
     }
 
     state.createUser(onlineUser);
+    const currentUser = state.getUser(user.id);
+    const data: Record<string, string | boolean | number> = {}
+
+    if(currentUser?.leaveTimerId !== 0){
+        clearInterval(currentUser?.leaveTimerId);
+    }
+
+    if(currentUser?.roomId){
+        const room = state.getRoomById(currentUser.roomId);
+        if(!room){
+            return console.error("room does not exist");
+        }
+
+        data.state = room.currentState;
+    }
 
     send(socket, {
-        event: "user:recieved",
-        data: {
-            id: user.id,
-            name: user.name,
-        }
+        event: "user:sent-room-state",
+        data: data
     });
 }
 
-export function handleUserLeave(socket: WebSocket, data: Record<string, string>): void{
+export function handleUserLogout(socket: WebSocket, data: Record<string, string>): void {
     const user = state.getUser(data.userId);
     
     if(!user){
-        return;
+        return console.error("user does not exist");
     }
 
     state.deleteUser(user);
 
     send(socket, {
-        event: "user:left",
+        event: "user:logged-out",
         data: {}
     });
+}
+
+export function handleUserLeaveRoom(socket: WebSocket, data: Record<string, string>): void{
+    const user = state.getUser(data.userId);
+    
+    if(!user){
+        return console.error("user does not exist");
+    }
+
+    const room = state.getRoomById(user.roomId as string);
+
+    if(!room){
+        return console.error("room does not exist");
+    }
+
+    const roomUsers = state.getUsers(room.id);
+    state.resetUser(user);
+
+    if(roomUsers.length === 0){
+        state.deleteRoomById(room.id);
+    }
+
+    broadcastToRoom(socket, room.id, {
+        event: "user:left",
+        data: {
+            id: user.id
+        }
+    });
+}
+
+export function handleUserLeaveByClosing(socket: WebSocket){
+    const user = state.getUserBySocket(socket);
+    
+    if(!user){
+        return console.error("user does not exist");
+    }
+
+    const timerStartTime: number = Date.now();
+    const timerId = setInterval(() => {
+        timerHandler(
+            timerStartTime,
+            undefined,
+            timerId,
+            state.settings.timer.durationM,
+            undefined,
+            () => {
+                if(user.roomId){
+                    handleUserLeaveRoom(socket, {
+                        userId: user.id
+                    });
+                }
+                state.deleteUser(user)
+            },
+        )
+    }, 1000);
+
+    state.setLeaveTimerId(user, timerId);
 }
 
 export function handleCreateRoom(socket: WebSocket, user: Record<string, string | boolean | number>): void{
@@ -310,8 +132,7 @@ export function handleCreateRoom(socket: WebSocket, user: Record<string, string 
     const foundUser = state.getUser(user.id as string);
 
     if(!foundUser){
-        console.error("User not found");
-        return;
+        return console.error("User not found");
     }
 
     const room: Room = {
@@ -320,7 +141,9 @@ export function handleCreateRoom(socket: WebSocket, user: Record<string, string 
         matches: user.matchAmount as number,
         currentRound: 0,
         currentMatch: 0,
-        rounds: 3,
+        rounds: state.settings.room.rounds,
+        currentTime: 0,
+        currentState: state.order[0]
     }
 
     state.createRoom(room);
@@ -328,7 +151,7 @@ export function handleCreateRoom(socket: WebSocket, user: Record<string, string 
     state.addUserToRoom(foundUser, id);
 
     send(socket, {
-        event: "room:created",
+        event: "room:render",
         data: {
             roomPwd: password,
             imgs: state.profilePics
@@ -341,13 +164,11 @@ export function handleJoinRoom(socket: WebSocket, data:Record<string, string>): 
     const specificRoom = state.getRoomByPwd(data.roomPwd);
 
     if(!specificRoom){
-        console.error("room not found");
-        return;
+        return console.error("room not found");
     }
 
     if(!specificUser){
-        console.error("user not found");
-        return;
+        return console.error("user not found");
     }
 
     state.addUserToRoom(specificUser, specificRoom.id);
@@ -364,8 +185,7 @@ export function handleJoinRoom(socket: WebSocket, data:Record<string, string>): 
     const users = state.getUsers(specificRoom.id); 
 
     if(!users){
-        console.error("Users does not exist")
-        return;
+        return console.error("Users does not exist");
     }
 
     send(socket, {
@@ -383,7 +203,7 @@ export function handleProfileChange(socket: WebSocket, data:Record<string, strin
 
     
     if(!specificUser){
-        return;
+        return console.error("user not found");
     }
 
     state.setNewUserImg(specificUser, data.img);
@@ -408,7 +228,7 @@ export function handleUserUnready(socket: WebSocket, data:Record<string, string 
     const specificUser = state.getUser(data.id as string);
     
     if(!specificUser){
-        return;
+        return console.error("user not found");
     }
 
     state.editUserReadyStatus(specificUser, data.ready as boolean);
@@ -476,17 +296,32 @@ export function handleUserReady(socket: WebSocket, data:Record<string, string | 
 }
 
 
-function timerHandler(startTime: number, roomId: string, timerId: number, duration:number, event: string | undefined, onTimeOut: VoidFunction){ 
+function timerHandler(startTime: number, roomId: string | undefined, timerId: number, duration:number, event: string | undefined, onTimeOut: VoidFunction, onCurrentTime: Record<string, number | VoidFunction> | undefined = undefined){ 
     const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
     const remainingTime = Math.max(duration - elapsedTime, 0);
 
-    if(event){
+    if(event && roomId){
+        const room = state.getRoomById(roomId);
+
+        if(!room){
+            return console.error("room does not exist");
+        }
+
+        state.setCurrentTimer(room, remainingTime);
         broadcastToRoom(undefined, roomId, {
             event: event,
             data: {
                 "timer": remainingTime,
             }
         });
+    }
+
+    if(onCurrentTime){
+        if(remainingTime === onCurrentTime.time){
+            if(typeof(onCurrentTime.func) === "function"){
+                onCurrentTime.func();
+            }
+        }
     }
 
     if(remainingTime === 0){
@@ -502,7 +337,7 @@ export function handleStartMatch(socket: WebSocket | undefined, data:Record<stri
     const event = "timer:ticking";
     
     if(!roomUsers){
-        return;
+        return console.error("users not found");
     }
 
     const randomUser = state.getRandomUser(roomUsers);
@@ -511,24 +346,25 @@ export function handleStartMatch(socket: WebSocket | undefined, data:Record<stri
     const randomRoomUser = state.getRandomUser(roomUsers);
     state.makeUserCategoryChooser(randomRoomUser);
 
+    const room = state.getRoomById(data.roomId);
+    if(!room){
+        return console.error("room does not exist");
+    }
+
+    state.setCurrentState(room, state.order[1]);
+
     const timerId = setInterval(() => {
         timerHandler(
             timerStartTime,
             roomId,
             timerId,
-            state.timer.duration,
+            state.settings.timer.durationM,
             event,
             () => {
                 handleRandomCategory(roomId);
             },
         );
     }, 1000);
-
-    const room = state.getRoomById(data.roomId);
-
-    if(!room){
-        return console.error("room does not exist");
-    }
 
     state.setTimerId(room, timerId);
 
@@ -538,7 +374,7 @@ export function handleStartMatch(socket: WebSocket | undefined, data:Record<stri
             "id": randomRoomUser.id,
             "name": randomRoomUser.name,
             "categories": state.categories,
-            "time": state.timer.duration,
+            "time": state.settings.timer.durationM,
         }
     });
 }
@@ -561,9 +397,10 @@ export function handleCategoryChosen(socket: WebSocket, data:Record<string, stri
     const category = state.getCategoryById(data.categoryId);
 
     if(!room || !category){
-        return;
+        return console.error("Room or category does not exist");
     }
 
+    state.setCurrentState(room, state.order[2]);
     state.addCategoryToRoom(room, category);
     clearInterval(room.timerId);
 
@@ -573,7 +410,7 @@ export function handleCategoryChosen(socket: WebSocket, data:Record<string, stri
             categoryId: data.categoryId,
             userId: user.id,
             userName: user.name,
-            time: state.timer.shortDuration,
+            time: state.settings.timer.durationS,
         }
     });
 
@@ -584,7 +421,7 @@ export function handleCategoryChosen(socket: WebSocket, data:Record<string, stri
             timerStartTime,
             roomId,
             timerId,
-            state.timer.shortDuration,
+            state.settings.timer.durationS,
             event,
             () => {
                 handleRounds(roomId)
@@ -615,6 +452,7 @@ function handleRandomCategory(roomId: string){
     }
 
     state.addCategoryToRoom(room, randCategory);
+    state.setCurrentState(room, state.order[2]);
 
     broadcastToRoom(undefined, roomId, {
         event: "category:chosen",
@@ -622,7 +460,7 @@ function handleRandomCategory(roomId: string){
             categoryId: randCategory.id,
             userId: specificUser.id,
             userName: specificUser.name,
-            time: state.timer.shortDuration,
+            time: state.settings.timer.durationS,
         }
     });
 
@@ -634,7 +472,7 @@ function handleRandomCategory(roomId: string){
             timerStartTime,
             roomId,
             timerId,
-            state.timer.shortDuration,
+            state.settings.timer.durationS,
             event,
             () => {
                 handleRounds(roomId)
@@ -660,7 +498,9 @@ function handleRounds(roomId: string){
 
     const randType = state.getRandomTypeInCategory(category);
     const randQuestion = state.getRandomQuestionInCategory(randType);
+    state.setCurrentCategoryImg(room, randType.img);
     state.setQuestionToRoom(room, randQuestion);
+    state.setCurrentState(room, state.order[3]);
 
     const timerStartTime: number = Date.now();
     const event = "timer:ticking";
@@ -670,7 +510,7 @@ function handleRounds(roomId: string){
         data: {
             categoryName: category.name,
             question: randQuestion,
-            time: state.timer.duration,
+            time: state.settings.timer.durationXl,
             villain: villainId as string,
             img: randType.img,
         }
@@ -681,39 +521,78 @@ function handleRounds(roomId: string){
             timerStartTime,
             roomId,
             timerId,
-            state.timer.duration,
+            state.settings.timer.durationXl,
             event,
             () => {
-                handleShowQuestion(roomId);
+                handleShowAction(roomId);
+            },
+            {
+                time: 3,
+                func(){
+                    state.setCurrentState(room, state.order[4]);
+                    broadcastToRoom(undefined, roomId, {
+                        event: "game:action-countdown",
+                        data: {}
+                    });
+                }
             }
         );
     }, 1000);
 }
 
+function handleShowAction(roomId: string){
+    const timerStartTime: number = Date.now();
+    const room = state.getRoomById(roomId);
+    if(!room){
+        return console.error("room does not exist");
+    }
+
+    state.setCurrentState(room, state.order[5]);
+    broadcastToRoom(undefined, roomId, {
+        event: "game:action",
+        data: {
+            "action": state.getActionType(room)
+        }
+    });
+
+    const timerId = setInterval(() => {
+        timerHandler(
+            timerStartTime,
+            undefined,
+            timerId,
+            state.settings.timer.durationS,
+            undefined,
+            () => {handleShowQuestion(roomId)},
+        )
+    }, 1000);
+}
+
+
 function handleShowQuestion(roomId: string): void{
     const room = state.getRoomById(roomId);
 
     if(!room?.currentQuestion){
-        return;
+        return console.error("room key current question does not exist");
     }
 
     broadcastToRoom(undefined, roomId, {
         event: "game:show-prompt",
         data: {
-            time: state.timer.shortDuration,
+            time: state.settings.timer.durationM,
             question: room.currentQuestion
         }
     });
 
     const timerStartTime: number = Date.now();
     const event = "timer:ticking";
+    state.setCurrentState(room, state.order[6]);
 
     const timerId = setInterval(() => {
         timerHandler(
             timerStartTime,
             roomId,
             timerId,
-            state.timer.shortDuration,
+            state.settings.timer.durationM,
             event,
             () => {handleVoting(roomId)}
         );
@@ -722,11 +601,17 @@ function handleShowQuestion(roomId: string): void{
 
 function handleVoting(roomId: string): void{
     const roomUsers = state.getUsers(roomId);
+    const room = state.getRoomById(roomId);
+    if(!room){
+        return console.error("room does not exist");
+    }
+
+    state.setCurrentState(room, state.order[7]);
 
     broadcastToRoom(undefined, roomId, {
         event: "game:voting",
         data: {
-            time: state.timer.duration,
+            time: state.settings.timer.durationXl,
             users: roomUsers
         }
     });
@@ -739,7 +624,7 @@ function handleVoting(roomId: string): void{
             timerStartTime,
             roomId,
             timerId,
-            state.timer.duration,
+            state.settings.timer.durationXl,
             event,
             () => {handleVotingTimeOut(roomId)}
         );
@@ -750,7 +635,7 @@ export function handleUserVote(socket: WebSocket, data: Record<string, string>):
     const userVoted = state.getUser(data.votedId);
 
     if(!userVoted?.roomId){
-        return;
+        return console.error("user key roomId does not exist");
     }
 
     state.editPlayerVote(userVoted, data.voteId);
@@ -772,9 +657,16 @@ export function handleVotingTimeOut(roomId:string):void{
     const villain = state.getVillain(roomUsers);
     const data: Record<string, string | boolean | number> = {};
     let nextAction = () => onRoundEnd(roomId);
+    
+    const room = state.getRoomById(roomId);
+    if(!room){
+        return console.error("room does not exist");
+    }
+
+    state.setCurrentState(room, state.order[8]);
 
     if(!villain){
-        return;
+        return console.error("villain does not exist");
     }
 
     if(!userVoted){
@@ -782,17 +674,21 @@ export function handleVotingTimeOut(roomId:string):void{
         const usersRight = state.getUsersWhoVotedRight(roomUsers, villain);
 
         if(usersRight.length !== 0 || usersRight !== undefined){
-            state.addScoreToPlayers(usersRight, 150);
-            state.addScoreToPlayers([villain], (-50 * usersRight.length));
+            state.addScoreToPlayers(usersRight, state.settings.points.notEverybodyRight);
+            if(usersRight.length >= 4){
+                state.addScoreToPlayers([villain], (state.settings.points.maxFakerPenalty));
+            }
+            else{
+                state.addScoreToPlayers([villain], (state.settings.points.fakerPerUserRight * usersRight.length));
+            }
         }
-        state.addScoreToPlayers([villain], 150);
-
+        state.addScoreToPlayers([villain], state.settings.points.fakerNotCaught);
     }
     
     else if(userVoted === villain){
         data.villainId = villain.id;
         const usersNotVillain = state.getAllNotVillain(roomUsers);
-        state.addScoreToPlayers(usersNotVillain, 100);
+        state.addScoreToPlayers(usersNotVillain, state.settings.points.everybodyRight);
         nextAction = () => onMatchEnd(roomId);
     }
 
@@ -800,10 +696,10 @@ export function handleVotingTimeOut(roomId:string):void{
         data.userId = userVoted.id;
         data.userName = userVoted.name;
         data.userImg = userVoted.img;
-        state.addScoreToPlayers([villain], 150);
+        state.addScoreToPlayers([villain], state.settings.points.fakerNotCaught);
     }
 
-    data.time = state.timer.shortDuration;
+    data.time = state.settings.timer.durationS;
 
     broadcastToRoom(undefined, roomId, {
         event: "game:everybody-voted",
@@ -818,7 +714,7 @@ export function handleVotingTimeOut(roomId:string):void{
             timerStartTime,
             roomId,
             timerId,
-            state.timer.shortDuration,
+            state.settings.timer.durationS,
             event,
             nextAction
         );
@@ -830,7 +726,7 @@ function onRoundEnd(roomId: string): void{
     const roomUsers = state.getUsers(roomId);
 
     if(!room){
-        return;
+        return console.error("room does not exist");
     }
 
     state.resetRoundUsers(roomUsers);
@@ -850,7 +746,7 @@ function onMatchEnd(roomId: string){
     const roomUsers = state.getUsers(roomId);
 
     if(!room){
-        return;
+        return console.error("room does not exist");
     }
     state.setNewMatch(room);
     state.resetMatchUsers(roomUsers);
@@ -872,11 +768,11 @@ function onMatchEnd(roomId: string){
 function handleLeaderboard(roomId: string): void{
     const roomUsers = state.getUsers(roomId);
     const room = state.getRoomById(roomId);
-    
     if(!room){
-        return;
+        return console.error("room does not exist");
     }
-    
+
+    state.setCurrentState(room, state.order[9]);
     const usersAsc = state.getUsersAscendingScore(roomUsers);
     
     broadcastToRoom(undefined, roomId, {
@@ -887,50 +783,41 @@ function handleLeaderboard(roomId: string): void{
     });
     
     state.resetRoom(room);
-    state.resetRoomUsers(roomUsers);
+    state.resetLeaderboardUsers(roomUsers);
 }
 
 export function handleGoToMenu(socket: WebSocket, data:Record<string,string>){
     const user = state.getUser(data.userId);
 
     if(!user){
-        return;
-    }
-
-    const room = state.getRoomById(user.roomId as string);
-
-    if(!room){
-        return;
-    }
-
-    const roomUsers = state.getUsers(room.id);
-    state.resetUser(user);
-
-    if(roomUsers.length === 0){
-        state.deleteRoomById(room.id);
+        return console.error("user does not exist");
     }
 
     send(socket, {
         event: "game:gone-to-menu",
         data: {
-            //user
+            name: user.name 
         }
     });
 }
 
 export function handlePlayAgain(socket: WebSocket, data:Record<string,string>){
     const specificUser = state.getUser(data.userId);
-
+    
     if(!specificUser?.roomId){
-        return;
+        return console.error("room key roomId does not exist");
     }
+
+    state.resetScore(specificUser);
 
     const roomUsers = state.getUsers(specificUser.roomId);
     const room = state.getRoomById(specificUser.roomId);
     
     if(!room){
-        return;
+        return console.error("room does not exist");
     }
+
+    state.setCurrentState(room, state.order[0]);
 
     send(socket, {
         event: "game:gone-play-again",
@@ -941,12 +828,4 @@ export function handlePlayAgain(socket: WebSocket, data:Record<string,string>){
         }
     });
 
-}
-
-function handleLeaveRoom(socket: WebSocket, user: OnlineUser): void{
-
-}
-
-export function send(socket:WebSocket, payload:ServerToClientMessage): void{
-    socket.send(JSON.stringify(payload));
 }

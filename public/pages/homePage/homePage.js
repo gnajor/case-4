@@ -1,6 +1,8 @@
+import { renderBackArrow } from "../../components/backArrow.js";
 import { pageHandler } from "../../pageHandler/pageHandler.js";
+import { userState } from "../../userState/userState.js";
 
-export function renderHomePage(parentId, data){
+export function renderHomePage(parentId){
     const parent = document.querySelector("#" + parentId);
 
     if(!parent){
@@ -28,7 +30,7 @@ export function renderHomePage(parentId, data){
                                 </div>
                             </div>
                             <div class="page-title">
-                                <h1>Welcome <br> ${data}</h1>
+                                <h1>Welcome <br> ${userState.currentUser.name}</h1>
                             </div>
                             <div class="big-button-container">
                                 <button id="join-button">Join Game</button>
@@ -39,6 +41,7 @@ export function renderHomePage(parentId, data){
     const joinButton = parent.querySelector("#join-button");
     const hostButton = parent.querySelector("#host-button");
     const logoutButton = parent.querySelector("#logout-button");
+    const rulesButton = parent.querySelector("#rules-button");
 
     logoutButton.addEventListener("click", () => {
         pageHandler.handleLogout();
@@ -51,4 +54,39 @@ export function renderHomePage(parentId, data){
     hostButton.addEventListener("click", () => {
         pageHandler.handleRoomSettings();
     });
+    
+    rulesButton.addEventListener("click", () => {
+        renderRules(parentId);
+    });
+}
+
+function renderRules(parentId){
+    const parent = document.querySelector("#" + parentId);
+
+    if(!parent){
+        return console.error("Parent Not Found");
+    }
+
+    parent.innerHTML = `<div id="home-page-rules">
+                            <div class="arrow-back-container"></div>
+                            <div class="page-title">
+                                <h1>Rules</h1>
+                            </div>
+                            <div id="text-container">
+                                <p>The game is all about tricking the other players! Here’s how it works:</p>
+                                <p>Each round, a random player picks a category, and everyone else gets a question based on it. Players will answer by pointing, holding up fingers, or raising their hands. However, one player is the Faker and does not receive the question— their goal is to blend in and avoid being caught.</p>
+                                <div>
+                                    <p>Points are awarded based on how well everyone does:</p>
+                                    <ul>
+                                        <li>If everyone guesses the Faker correctly, everyone earns 200 points.</li>
+                                        <li>If not everyone agrees on the same Faker, everyone who voted right earns 150 points.</li>
+                                        <li>The Faker earns 200 points for each player they successfully trick, but loses 50 points for each player who guesses correctly.</li>
+                                    </ul>
+                                </div>
+                                <p>At the end of each round, players vote on who they think the Faker is. Be convincing, stay sharp, and try to fool everyone to win!</p>
+                            </div>
+                        </div>`;
+
+    const arrowBack = parent.querySelector(".arrow-back-container");
+    renderBackArrow(arrowBack, "home");
 }

@@ -27,7 +27,7 @@
 }
 
 html{
-    font-size: 16px;
+    font-size: 15px;
 }
 
 *{
@@ -36,13 +36,20 @@ html{
 
 body{
     margin:0;
-    /* background-color: var(--black-color); */
+    background-color: var(--black-color);
 }
 
 h1, h2{
     text-align: center;
     margin:0;
     color: var(--white-color);
+}
+
+p, li, ul{
+    margin:0;
+    color: var(--white-color);
+    font-size: 1.25rem;
+    font-family: "gowun-batang";
 }
 
 button{
@@ -117,8 +124,8 @@ input:focus{
 
 .page-title{
     padding:0 10%;
-    margin-top: 4.5rem;
     line-height:1.2; 
+    padding-top: 4.5rem;
 }
 
 .yellow-button{
@@ -183,10 +190,25 @@ input:focus{
     position: absolute;
     top:0;
     right:0;
-    padding:2rem;
-     
+    width: 5.5rem;
+    height: 5.5rem;
     font-size: 2rem;
     clip-path: polygon(20% 0%, 100% 0, 100% 100%, 0 85%);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.timer-container.timer-change #timer{
+    background-color: transparent;
+    color: var(--white-color);
+    position: static;
+    font-size: 4rem;
+    width:fit-content;
+    height: fit-content;
+    clip-path: none;
+    text-align: center;
 }
 
 .category{
@@ -250,7 +272,10 @@ input:focus{
 #profile-shape-8{
     clip-path: polygon(0 18%, 100% 0, 77% 100%, 20% 89%);
 }
-/* entry-page css */
+
+
+/* entry-page*/
+
 
 #entry-page{
     background-image: url("./media/backgrounds/entry-page-background.png");
@@ -334,7 +359,7 @@ input:focus{
 }
 
 
-/* homePage */
+/* home-page */
 
 
 #home-page{
@@ -383,7 +408,31 @@ input:focus{
 }
 
 
-/* joinPage */
+/* home-page-rules */
+
+
+#home-page-rules{
+    background-image: url("media/backgrounds/rules-background.png");
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
+    min-height: 100dvh;
+}
+
+#home-page-rules #text-container{
+    padding:0 10%;
+    padding-bottom: 4.5rem;
+    display: flex;
+    flex-direction: column;
+    gap:1.5rem;
+}
+
+#home-page-rules .page-title{
+    padding-bottom: 2rem;
+}
+
+
+/* join-page */
 
 
 #join-page{
@@ -428,7 +477,7 @@ input:focus{
 }
 
 
-/* PreGamePage */
+/* pre-game-page */
 
 
 #pre-game-page{
@@ -437,7 +486,7 @@ input:focus{
     flex-direction: column;
     align-items: center;
     
-    background-image: url("./media/backgrounds/lobby-background.png");
+    background-image: url("./media/backgrounds/lobby-background-two.png");
     background-size: cover;
 }
 
@@ -473,7 +522,7 @@ input:focus{
 }
 
 
-/* lobbyPage */
+/* lobby-page */
 
 
 #lobby-page{
@@ -526,9 +575,10 @@ input:focus{
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    row-gap:4rem;
-    column-gap: 4rem;
+    row-gap:3rem;
+    column-gap: 3rem;
     margin-top:2rem;
+    margin-bottom:2rem;
     padding:0 10%;
 }
 
@@ -579,6 +629,9 @@ input:focus{
     position: relative;
 }
 
+#lobby-page:has(.button-container .ready) .arrow{
+    pointer-events: none;
+}
 
 /* category-page */
 
@@ -638,7 +691,7 @@ input:focus{
 }
 
 
-/* Prompt Page */
+/* prompt-page */
 
 
 #prompt-page{
@@ -658,6 +711,11 @@ input:focus{
 #prompt-page:has(#fingers){background-image: url("./media/backgrounds/categories-background.png");}
 #prompt-page:has(#hand){background-image: url("./media/backgrounds/hand-background.png");}
 
+#prompt-page:has(.turn-red) #timer{
+    background-color: var(--red-color);
+    color: var(--white-color);
+}
+
 #prompt-page #prompt{
     font-size: 2rem;
     text-align: center;
@@ -671,7 +729,7 @@ input:focus{
 }
 
 
-/* Voting page */
+/* voting-page */
 
 
 #voting-page{
@@ -681,6 +739,7 @@ input:focus{
     
     background-image: url("./media/backgrounds/voting-background.png");
     background-size: cover;
+    padding:0 10%;
 }
 
 #voting-page #title{
@@ -692,9 +751,10 @@ input:focus{
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    row-gap:4rem;
-    column-gap: 4rem;
+    row-gap:3.5rem;
+    column-gap: 3.5rem;
     margin-top:2rem;
+    margin-bottom: 2rem;
 }
 
 #voting-page #title-and-users{
@@ -767,10 +827,31 @@ input:focus{
     align-items: center;
     flex-direction: column;
     gap:1rem;
+    padding:0 10%;
+}
+
+#voting-result-page #img-container{
+    line-height: 0;
+    width: 8rem;
+}
+
+#voting-result-page #img-container:has(.user){
+    clip-path: polygon(0 18%, 100% 0, 77% 100%, 20% 89%);
+    background-color: var(--white-color);
+    padding: 2rem;
+    width: 12rem;
+}
+
+#voting-result-page img{
+    height: 100%;
+    width: 100%;
 }
 
 
+
+
 /* Leaderboard-page*/
+
 
 
 #leaderboard-page{
@@ -783,6 +864,7 @@ input:focus{
     background-size: cover;
     background-position: center;
 }
+
 
 #leaderboard-page #leaderboard{
     display: flex;
@@ -858,6 +940,9 @@ input:focus{
 
 #leaderboard-page #other-users-container{
     padding-top: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 #leaderboard-page #other-users-container .user{
@@ -868,14 +953,28 @@ input:focus{
     background-color: var(--white-color);
     color: var(--black-color);
     padding:0.5rem 3rem 0.5rem 2.5rem;
-    clip-path: polygon(0 0, 100% 0, 100% 80%, 0% 100%);
 }
+
+#leaderboard-page #other-users-container .user:nth-child(odd){
+    clip-path: polygon(0 0, 100% 0, 100% 80%, 0% 100%);
+    padding:0.5rem 3rem 0.5rem 2.5rem;
+}
+#leaderboard-page #other-users-container .user:nth-child(even){
+    clip-path: polygon(0 20%, 100% 0, 100% 100%, 0% 100%);
+    padding: 1rem 3rem 0rem 2.5rem;
+}
+
 
 #leaderboard-page #other-users-container .user .profile{
     display: flex;
     flex-direction: row;
     height: fit-content;
     width: fit-content;
+}
+
+#leaderboard-page #other-users-container .profile-pic{
+    line-height: 0;
+    width: 3rem;
 }
 
 #leaderboard-page #other-users-container .name,
@@ -896,6 +995,9 @@ input:focus{
 
 
 
+/* padding bottom */
+
+/* every picture cant be big */
 
 
 

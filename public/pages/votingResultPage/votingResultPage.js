@@ -12,14 +12,16 @@ export function renderVotingResultPage(parentId, data){
     parent.innerHTML = `<div id="voting-result-page">
                             <div class="timer-container"></div>
                             <div id="main">
-                                <img>
-                                <div id="page-subtitle">
+                                <div id="img-container">
+                                    <img>
+                                </div>
+                                <div class="page-subtitle">
                                     <h2></h2>
                                 </div>
                             </div>
                         </div>`;
 
-    const subTitle = parent.querySelector("#page-subtitle h2");
+    const subTitle = parent.querySelector(".page-subtitle h2");
     const img = parent.querySelector("img");
     const timerContainer = parent.querySelector(".timer-container");
     renderTimer(timerContainer, data.time);
@@ -38,10 +40,12 @@ export function renderVotingResultPage(parentId, data){
         if(data.userId === userState.getId()){
             subTitle.textContent = "You are not the villain";
             img.setAttribute("src","../../media/profiles/" + data.userImg);
+            img.classList.add("user");
         }
         else{
             subTitle.textContent = data.userName + " is not the villain";
             img.setAttribute("src", "../../media/profiles/" + data.userImg);
+            img.classList.add("user");
         }
     }
 

@@ -1,6 +1,5 @@
 import { renderTimer } from "../../components/timer.js";
 import { Category } from "../../entities/category.js";
-import { User } from "../../entities/user.js";
 import { userState } from "../../userState/userState.js";
 import { PubSub } from "../../utils/pubsub.js";
 
@@ -23,8 +22,9 @@ export function renderPromptPage(parentId, data){
                         </div>`;
     
     const timerContainer = parent.querySelector(".timer-container");
-
+    timerContainer.classList.add("turn-red");
     renderTimer(timerContainer, data.time);
+
     const category = new Category(undefined, data.categoryName, "categories");
 
     if(data.villain === userState.getId()){
@@ -34,12 +34,30 @@ export function renderPromptPage(parentId, data){
 }
 
 PubSub.subscribe({
+    event: "game:action-countdown",
+    listener: () => {
+        document.querySelector("#prompt").classList.add("disappear");
+        document.querySelector("#categories").classList.add("disappear");
+        document.querySelector("#image-container").classList.add("disappear");
+
+        document.querySelector(".timer-container").classList.add("timer-change");
+        document.querySelector(".timer-container").classList.remove("turn-red");
+
+    }
+});
+
+PubSub.subscribe({
     event: "game:show-prompt",
     listener: (data) => {
         const prompt = document.querySelector("#prompt");
         prompt.textContent = data.question;
+        prompt.classList.remove("disappear")
 
         const imageContainer = document.querySelector("#image-container");
-        imageContainer.classList.add("disappear")
+        imageContainer.classList.add("disappear");
+
+        document.querySelector("#categories").classList.remove("disappear");
+        document.querySelector(".timer-container").classList.remove("timer-change");
+        document.querySelector(".timer-container").classList.remove("turn-red");
     }
-})
+});

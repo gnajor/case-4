@@ -3,16 +3,7 @@ import { PubSub } from "./utils/pubsub.js";
 
 const socket = new WebSocket(`ws://${window.location.hostname}:8000/`);
 
-//to be able to use reload and the arrows you need to store the page history in either localStorage or sessionStorage
-//right now I have a shared state: one in the server and one in the classes which is kinda stupid and has led to a lot of problems so I will fix : )
-
-window.addEventListener("popstate", () => { //popstate AKA using the website arrows 
-    handleRoute(); 
-});
-
 window.addEventListener("load", () => {
-    handleRoute();
-
     socket.addEventListener("open", () => {
         pageHandler.handleEntry();
     });
@@ -21,16 +12,12 @@ window.addEventListener("load", () => {
 
 socket.addEventListener("message", (event) => {
     const serverToClientMessage = JSON.parse(event.data);
-    console.log(serverToClientMessage.event);
     
     switch(serverToClientMessage.event){
-        case "user:recieved":{
-            PubSub.publish({
-                event: "user:recieved",
-                details: serverToClientMessage.data
-            });
+        case "user:sent-room-state": {
+            handleRoute(true, serverToClientMessage.data.state);
             break;
-        } 
+        }
 
         case "user:img-changed": {
             PubSub.publish({
@@ -61,6 +48,14 @@ socket.addEventListener("message", (event) => {
         }
 
         case "user:left": {
+            PubSub.publish({
+                event: "user:left",
+                details: serverToClientMessage.data
+            });
+            break;
+        }
+
+        case "user:logged-out": {
             navigateTo("entry");
             break;
         }
@@ -74,7 +69,10 @@ socket.addEventListener("message", (event) => {
         }
 
         case "user:you-readied": {
-            console.log(serverToClientMessage.data); 
+            PubSub.publish({
+                event: "user:you-readied",
+                details: serverToClientMessage.data.ready
+            });
             break
         }
 
@@ -104,7 +102,7 @@ socket.addEventListener("message", (event) => {
             break
         }
 
-        case "room:created": {
+        case "room:render": {
             navigateTo("lobby", serverToClientMessage.data);
             break;
         }
@@ -131,12 +129,28 @@ socket.addEventListener("message", (event) => {
             PubSub.publish({
                 event: "timer:ticking",
                 details: serverToClientMessage.data.time
-            })
+            });
            break;
         }
 
         case "game:start-match":{
             navigateTo("prompt", serverToClientMessage.data);
+            break;
+        }
+
+        case "game:action-countdown": {
+            PubSub.publish({
+                event: "game:action-countdown",
+                details: null,
+            });
+            break;
+        }
+
+        case "game:action": {
+            PubSub.publish({
+                event: "game:action",
+                details: serverToClientMessage.data.action
+            });
             break;
         }
 
@@ -169,12 +183,11 @@ socket.addEventListener("message", (event) => {
         }
 
         case "game:gone-to-menu": {
-            navigateTo("home", serverToClientMessage.data);
+            navigateTo("home", serverToClientMessage.data.name);
             break;
         }
 
         case "game:gone-play-again": {
-            console.log(serverToClientMessage.data);
             navigateTo("lobby", serverToClientMessage.data);
             break;
         }
@@ -182,12 +195,12 @@ socket.addEventListener("message", (event) => {
 });
 
 socket.addEventListener("close", () => {
-    console.log("connection closed");
+    console.log("ok I'm leaving");
 });
 
-export function userLeave(data){
+export function userLogout(data){
     const message = {
-        action: "user:leave",
+        action: "user:logout",
         data: data
     }
 
@@ -228,8 +241,6 @@ export function makeUserUnready(user){
 }
 
 export function addUserToWs(user){
-    //might check later if user is already in the array
-
     const message = {
         action: "user:join",
         data: user
@@ -287,9 +298,64 @@ export function playAgain(data){
     socket.send(JSON.stringify(message));
 }
 
+//
 
+export function getRoomData(id){
+    const message = {
+        action: "room:get-current-data",
+        data: {
+            id
+        }
+    }
+    socket.send(JSON.stringify(message));
+}
 
+export function getRoomCategoryChooser(id){
+    const message = {
+        action: "room:get-category-data",
+        data: {
+            id
+        }
+    }
+    socket.send(JSON.stringify(message));
+}
 
-//from component PubSub to apiCom, check if login is correct and pubsub to a redirectFile. This file redirects the path that is needed
+export function getRoomPromptData(id){
+    const message = {
+        action: "room:get-prompt-data",
+        data: {
+            id
+        }
+    }
+    socket.send(JSON.stringify(message));
+}
 
-//For example Login Pubsub to apicom and from apicom Pubsub to 
+export function getRoomVotingData(id){
+    const message = {
+        action: "room:get-voting-data",
+        data: {
+            id
+        }
+    }
+    socket.send(JSON.stringify(message));
+}
+
+export function getRoomResultsData(id){
+    const message = {
+        action: "room:get-results-data",
+        data: {
+            id
+        }
+    }
+    socket.send(JSON.stringify(message));
+}
+
+export function getRoomLeaderboardData(id){
+    const message = {
+        action: "room:get-leaderboard-data",
+        data: {
+            id
+        }
+    }
+    socket.send(JSON.stringify(message));
+}
